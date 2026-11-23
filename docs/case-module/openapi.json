@@ -1,0 +1,4213 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tergovchi — Jinoyat ishi v2",
+    "version": "2.0.0",
+    "description": "Working local prototype. USER=investigator; HEAD=department head. JPK procedural records and JK qualification are separate aggregates. Legacy game /api endpoints stay intact."
+  },
+  "servers": [{ "url": "/api/v1" }],
+  "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+  "tags": [{ "name": "Authentication" }, { "name": "Cases" }, { "name": "Administration" }],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "postauthlogin",
+        "summary": "Create session; access JWT expires in 15 minutes",
+        "tags": ["Authentication"],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/TokenSession" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Login" } } }
+        },
+        "description": "Sets HttpOnly strict-same-site access and rotating 7-day refresh cookies. Bearer API clients retain tergov_api_refresh at /api/v1/auth."
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "postauthrefresh",
+        "summary": "Rotate refresh cookie and return a new access JWT",
+        "tags": ["Authentication"],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/TokenSession" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "security": [{ "refreshCookie": [] }],
+        "description": "Refresh reuse revokes the token family. Versioned clients rotate their /api/v1/auth refresh cookie. Legacy browser clients use /api/auth/refresh."
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "postauthlogout",
+        "summary": "Revoke JWT session family and clear cookies",
+        "tags": ["Authentication"],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "type": "object", "properties": { "loggedOut": { "const": true } } },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/meta": {
+      "get": {
+        "operationId": "getmeta",
+        "summary": "Current role, department and visible investigator options",
+        "tags": ["Cases"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Meta" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/cases": {
+      "get": {
+        "operationId": "getcases",
+        "summary": "Preview-only paginated case registry",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "NEW",
+                "ASSIGNED",
+                "IN_INVESTIGATION",
+                "QUALIFICATION_SUBMITTED",
+                "SCORED",
+                "CLOSED",
+                "SUSPENDED"
+              ]
+            }
+          },
+          {
+            "name": "jkArticle",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "pattern": "^\\d{1,3}(-\\d{1,2})?$" }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "investigatorId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 10000, "default": 1 }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 6 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CaseList" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "description": "Filters are combined using AND. Date range applies to openedAt; to includes the entire UTC day. Preview has no documents, evidence, or persons."
+      },
+      "post": {
+        "operationId": "postcases",
+        "summary": "Admin creates a case with 1–10 episodes",
+        "tags": ["Cases"],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateCase" } }
+          }
+        }
+      }
+    },
+    "/cases/{id}": {
+      "get": {
+        "operationId": "getcasesid",
+        "summary": "General preview without evidence or documents",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/cases/{id}/workspace": {
+      "get": {
+        "operationId": "getcasesidworkspace",
+        "summary": "Scoped process metadata and permissions",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Workspace" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/cases/{id}/lock": {
+      "post": {
+        "operationId": "postcasesidlock",
+        "summary": "Investigator claims or renews the 24-hour case lock",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "description": "Case row SELECT FOR UPDATE serializes contenders. Existing assignment survives expiry or release; only department head can reassign."
+      },
+      "delete": {
+        "operationId": "deletecasesidlock",
+        "summary": "Owner releases lock while retaining assignment",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "type": "object", "properties": { "released": { "const": true } } },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/cases/{id}/persons": {
+      "get": {
+        "operationId": "getcasesidpersons",
+        "summary": "Role-filtered persons; auditors receive masked PII",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Persons" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postcasesidpersons",
+        "summary": "Admin adds a person before assignment",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": {
+                      "type": "object",
+                      "properties": { "id": { "type": "string", "format": "uuid" } }
+                    },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreatePerson" } }
+          }
+        }
+      }
+    },
+    "/cases/{id}/documents": {
+      "get": {
+        "operationId": "getcasesiddocuments",
+        "summary": "Document metadata with user-bound 15-minute signed links",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Documents" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postcasesiddocuments",
+        "summary": "Admin uploads a sanitized PDF or image while NEW",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": {
+                      "type": "object",
+                      "properties": { "id": { "type": "string", "format": "uuid" } }
+                    },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["data", "file"],
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "JSON: title (3..160), type (document enum), isEvidence (boolean)"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "PDF, JPEG, PNG or WebP; 4 MiB maximum. PDFs max100 pages; encrypted/malformed PDFs rejected."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cases/{id}/documents/{documentId}/file": {
+      "get": {
+        "operationId": "getcasesiddocumentsdocumentIdfile",
+        "summary": "Open protected document; starts investigator workflow",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "maxLength": 1500 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Private no-store document; binary, no envelope",
+            "content": {
+              "application/pdf": { "schema": { "type": "string", "format": "binary" } },
+              "image/webp": { "schema": { "type": "string", "format": "binary" } }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "description": "Signed URL alone is insufficient: authenticate as its intended user. Assignment and scope are rechecked. Active investigators need their lock. Opening the first document changes ASSIGNED to IN_INVESTIGATION."
+      }
+    },
+    "/cases/{id}/qualification": {
+      "get": {
+        "operationId": "getcasesidqualification",
+        "summary": "Investigator draft or supervisory read-only answers",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Draft" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "description": "ADMIN and AUDITOR denied. HEAD restricted to department; PROSECUTOR reads all. No reference keys included."
+      }
+    },
+    "/cases/{id}/qualification/answers/{element}": {
+      "put": {
+        "operationId": "putcasesidqualificationanswerselement",
+        "summary": "Autosave a single episode element using audited last-write-wins",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "element",
+            "in": "path",
+            "required": true,
+            "schema": { "enum": ["SUBJECT", "PARTICIPATION", "OBJECT", "OBJECTIVE", "SUBJECTIVE"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/DraftSaved" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/WriteDraft" } }
+          }
+        },
+        "description": "Payload must match Draft{element} schema. baseVersion starts at 0. Conflict returns conflict=true and saves the latest submitted value. Missing/foreign persons and episodes are rejected. First actual document must already be open. A new draft after scoring starts the next attempt; it is counted only on submit.",
+        "x-payload-schemas": {
+          "SUBJECT": { "$ref": "#/components/schemas/DraftSUBJECT" },
+          "PARTICIPATION": { "$ref": "#/components/schemas/DraftPARTICIPATION" },
+          "OBJECT": { "$ref": "#/components/schemas/DraftOBJECT" },
+          "OBJECTIVE": { "$ref": "#/components/schemas/DraftOBJECTIVE" },
+          "SUBJECTIVE": { "$ref": "#/components/schemas/DraftSUBJECTIVE" }
+        }
+      }
+    },
+    "/cases/{id}/qualification/submit": {
+      "post": {
+        "operationId": "postcasesidqualificationsubmit",
+        "summary": "Validate all episodes and atomically score attempt 1–3",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Score" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Submit" } } }
+        },
+        "description": "All five complete payloads required per episode. No reference →422. Global case limit3, final score=best; reassign does not reset it. Subject50; other four12.5 independently. Objective3 equally weighted subfields; subjective4 for intentional reference, otherwise3. F1 uses deduplicated sets, empty/empty=1. Notes are not graded. Multi-episode weighted mean; round only final total to2 decimals."
+      }
+    },
+    "/cases/{id}/score": {
+      "get": {
+        "operationId": "getcasesidscore",
+        "summary": "Score history; investigator sees own attempts only",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/ScoreHistory" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/cases/{id}/approve": {
+      "post": {
+        "operationId": "postcasesidapprove",
+        "summary": "Department head approves SCORED → CLOSED",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/cases/{id}/reassign": {
+      "post": {
+        "operationId": "postcasesidreassign",
+        "summary": "Department head reassigns to an active department investigator",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/Reassign" } }
+          }
+        }
+      }
+    },
+    "/cases/{id}/suspend": {
+      "post": {
+        "operationId": "postcasesidsuspend",
+        "summary": "Department head suspends the case",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/Suspend" } }
+          }
+        }
+      }
+    },
+    "/cases/{id}/resume": {
+      "post": {
+        "operationId": "postcasesidresume",
+        "summary": "Department head resumes a suspended case with a future deadline",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/CasePreview" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Resume" } } }
+        }
+      }
+    },
+    "/cases/{id}/export": {
+      "get": {
+        "operationId": "getcasesidexport",
+        "summary": "Download role-filtered report; no reference payloads",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": { "enum": ["pdf", "docx"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attachment; private,no-store; no JSON envelope",
+            "content": {
+              "application/pdf": { "schema": { "type": "string", "format": "binary" } },
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/admin/cases/{id}/reference-answers": {
+      "get": {
+        "operationId": "getadmincasesidreferenceanswers",
+        "summary": "Admin-only complete answer keys and fixed weights",
+        "tags": ["Administration"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Reference" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putadmincasesidreferenceanswers",
+        "summary": "Admin replaces all episode keys using revision check",
+        "tags": ["Administration"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": {
+                      "type": "object",
+                      "properties": { "revision": { "type": "integer", "minimum": 1 } }
+                    },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/WriteReference" } }
+          }
+        },
+        "description": "Exactly one answer per episode×five elements. All complete schemas apply. Fixed weights cannot be changed via payload. Revision mismatch409. Each score privately snapshots the reference revision; public results never contain these keys. Closed case keys are immutable."
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "operationId": "getadminusers",
+        "summary": "Admin paginated role management",
+        "tags": ["Administration"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 10000, "default": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Users" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "patch": {
+        "operationId": "patchadminusersid",
+        "summary": "Admin changes role/department/ban and revokes sessions",
+        "tags": ["Administration"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "type": "object", "properties": { "updated": { "const": true } } },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateUser" } }
+          }
+        },
+        "description": "Cannot remove own admin access or ban self. Last active admin is protected. Existing case assignment remains for head reassignment."
+      }
+    },
+    "/audit": {
+      "get": {
+        "operationId": "getaudit",
+        "summary": "Admin or auditor reads process audit; no answer payloads or plaintext PII",
+        "tags": ["Cases"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 10000, "default": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data", "requestId"],
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Audit" },
+                    "requestId": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "403": {
+            "description": "Role, scope, or signed URL denied",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "409": {
+            "description": "Assignment, lock, version, state, or attempt conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "422": {
+            "description": "Reference answers missing",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" },
+      "cookieAuth": { "type": "apiKey", "in": "cookie", "name": "tergov_access" },
+      "refreshCookie": { "type": "apiKey", "in": "cookie", "name": "tergov_api_refresh" }
+    },
+    "schemas": {
+      "CasePreview": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "caseNumber": { "type": "string" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "initialFacts": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "ASSIGNED",
+              "IN_INVESTIGATION",
+              "QUALIFICATION_SUBMITTED",
+              "SCORED",
+              "CLOSED",
+              "SUSPENDED"
+            ]
+          },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "closedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "jkArticles": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^\\d{1,3}(?:-\\d{1,2})?$" }
+          },
+          "episodeCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "assignee": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "displayName": { "type": "string" }
+                },
+                "required": ["id", "displayName"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "department": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "name": { "type": "string" },
+              "code": { "type": "string" }
+            },
+            "required": ["id", "name", "code"],
+            "additionalProperties": false
+          },
+          "lock": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "lockedBy": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "lockedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  },
+                  "expiresAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  }
+                },
+                "required": ["lockedBy", "lockedAt", "expiresAt"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "canTake": { "type": "boolean" },
+          "canEnter": { "type": "boolean" },
+          "blockReason": { "type": ["string", "null"] }
+        },
+        "required": [
+          "id",
+          "caseNumber",
+          "title",
+          "summary",
+          "initialFacts",
+          "status",
+          "openedAt",
+          "deadlineAt",
+          "closedAt",
+          "jkArticles",
+          "episodeCount",
+          "assignee",
+          "department",
+          "lock",
+          "canTake",
+          "canEnter",
+          "blockReason"
+        ],
+        "additionalProperties": false
+      },
+      "CaseList": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "caseNumber": { "type": "string" },
+                "title": { "type": "string" },
+                "summary": { "type": "string" },
+                "initialFacts": { "type": "string" },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "NEW",
+                    "ASSIGNED",
+                    "IN_INVESTIGATION",
+                    "QUALIFICATION_SUBMITTED",
+                    "SCORED",
+                    "CLOSED",
+                    "SUSPENDED"
+                  ]
+                },
+                "openedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "deadlineAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "closedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "jkArticles": {
+                  "type": "array",
+                  "items": { "type": "string", "pattern": "^\\d{1,3}(?:-\\d{1,2})?$" }
+                },
+                "episodeCount": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "assignee": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "displayName": { "type": "string" }
+                      },
+                      "required": ["id", "displayName"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "department": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "name": { "type": "string" },
+                    "code": { "type": "string" }
+                  },
+                  "required": ["id", "name", "code"],
+                  "additionalProperties": false
+                },
+                "lock": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "lockedBy": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "lockedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": ["lockedBy", "lockedAt", "expiresAt"]
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "canTake": { "type": "boolean" },
+                "canEnter": { "type": "boolean" },
+                "blockReason": { "type": ["string", "null"] }
+              },
+              "required": [
+                "id",
+                "caseNumber",
+                "title",
+                "summary",
+                "initialFacts",
+                "status",
+                "openedAt",
+                "deadlineAt",
+                "closedAt",
+                "jkArticles",
+                "episodeCount",
+                "assignee",
+                "department",
+                "lock",
+                "canTake",
+                "canEnter",
+                "blockReason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "page": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+          "pageSize": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": ["items", "total", "page", "pageSize", "serverTime"],
+        "additionalProperties": false
+      },
+      "Workspace": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "case": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "caseNumber": { "type": "string" },
+              "title": { "type": "string" },
+              "summary": { "type": "string" },
+              "initialFacts": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "NEW",
+                  "ASSIGNED",
+                  "IN_INVESTIGATION",
+                  "QUALIFICATION_SUBMITTED",
+                  "SCORED",
+                  "CLOSED",
+                  "SUSPENDED"
+                ]
+              },
+              "openedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              "deadlineAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              "closedAt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "jkArticles": {
+                "type": "array",
+                "items": { "type": "string", "pattern": "^\\d{1,3}(?:-\\d{1,2})?$" }
+              },
+              "episodeCount": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "assignee": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "displayName": { "type": "string" }
+                    },
+                    "required": ["id", "displayName"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "department": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "name": { "type": "string" },
+                  "code": { "type": "string" }
+                },
+                "required": ["id", "name", "code"],
+                "additionalProperties": false
+              },
+              "lock": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "lockedBy": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "lockedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      }
+                    },
+                    "required": ["lockedBy", "lockedAt", "expiresAt"]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "canTake": { "type": "boolean" },
+              "canEnter": { "type": "boolean" },
+              "blockReason": { "type": ["string", "null"] }
+            },
+            "required": [
+              "id",
+              "caseNumber",
+              "title",
+              "summary",
+              "initialFacts",
+              "status",
+              "openedAt",
+              "deadlineAt",
+              "closedAt",
+              "jkArticles",
+              "episodeCount",
+              "assignee",
+              "department",
+              "lock",
+              "canTake",
+              "canEnter",
+              "blockReason"
+            ],
+            "additionalProperties": false
+          },
+          "episodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "episodeNumber": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "description": { "type": "string" },
+                "jkArticle": { "type": "string", "pattern": "^\\d{1,3}(?:-\\d{1,2})?$" },
+                "location": { "type": "string" },
+                "dateTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "weight": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": [
+                "id",
+                "episodeNumber",
+                "description",
+                "jkArticle",
+                "location",
+                "dateTime",
+                "weight"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "permissions": {
+            "type": "object",
+            "properties": {
+              "canEdit": { "type": "boolean" },
+              "canApprove": { "type": "boolean" },
+              "canReassign": { "type": "boolean" },
+              "canManage": { "type": "boolean" }
+            },
+            "required": ["canEdit", "canApprove", "canReassign", "canManage"],
+            "additionalProperties": false
+          },
+          "attemptsUsed": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "referenceReady": { "type": "boolean" },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "case",
+          "episodes",
+          "permissions",
+          "attemptsUsed",
+          "referenceReady",
+          "serverTime"
+        ],
+        "additionalProperties": false
+      },
+      "Meta": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "email": {
+                "type": "string",
+                "maxLength": 254,
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              "displayName": { "type": "string", "minLength": 2, "maxLength": 80 },
+              "role": {
+                "type": "string",
+                "enum": ["USER", "HEAD", "PROSECUTOR", "ADMIN", "AUDITOR"]
+              },
+              "points": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "rankName": {
+                "type": "string",
+                "enum": [
+                  "LIEUTENANT",
+                  "SENIOR_LIEUTENANT",
+                  "CAPTAIN",
+                  "MAJOR",
+                  "LIEUTENANT_COLONEL",
+                  "COLONEL",
+                  "MAJOR_GENERAL",
+                  "LIEUTENANT_GENERAL",
+                  "COLONEL_GENERAL",
+                  "MARSHAL"
+                ]
+              },
+              "avatarUrl": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      { "type": "string", "format": "uri" },
+                      {
+                        "type": "string",
+                        "pattern": "^\\/api\\/media\\/(?:avatars|cases)\\/[a-f0-9-]{36}\\/[a-f0-9-]{36}\\.webp$"
+                      }
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "displayName",
+              "role",
+              "points",
+              "rankName",
+              "avatarUrl",
+              "createdAt"
+            ],
+            "additionalProperties": false
+          },
+          "department": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "name": { "type": "string" },
+              "code": { "type": "string" }
+            },
+            "required": ["id", "name", "code"],
+            "additionalProperties": false
+          },
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "name": { "type": "string" },
+                "code": { "type": "string" }
+              },
+              "required": ["id", "name", "code"],
+              "additionalProperties": false
+            }
+          },
+          "investigators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "displayName": { "type": "string" }
+              },
+              "required": ["id", "displayName"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["user", "department", "departments", "investigators"],
+        "additionalProperties": false
+      },
+      "Persons": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "fullName": { "type": "string" },
+            "birthDate": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            "gender": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
+            "address": { "type": "string" },
+            "pinfl": { "type": ["string", "null"] },
+            "photoUrl": { "type": ["string", "null"] },
+            "role": { "type": "string", "enum": ["SUSPECT", "WITNESS", "VICTIM", "OTHER"] },
+            "masked": { "type": "boolean" }
+          },
+          "required": [
+            "id",
+            "fullName",
+            "birthDate",
+            "gender",
+            "address",
+            "pinfl",
+            "photoUrl",
+            "role",
+            "masked"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "Documents": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "title": { "type": "string" },
+            "type": {
+              "type": "string",
+              "enum": [
+                "EXPERT_REPORT",
+                "WITNESS_TESTIMONY",
+                "SUSPECT_TESTIMONY",
+                "PROTOCOL",
+                "DECISION",
+                "EVIDENCE_PHOTO"
+              ]
+            },
+            "mime": { "type": "string" },
+            "bytes": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+            "isEvidence": { "type": "boolean" },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            "signedUrl": {
+              "type": "string",
+              "format": "starts_with",
+              "pattern": "^\\/api\\/v1\\/cases\\/.*"
+            },
+            "expiresAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "type",
+            "mime",
+            "bytes",
+            "isEvidence",
+            "createdAt",
+            "signedUrl",
+            "expiresAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "Draft": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "episodeId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "elementType": {
+                  "type": "string",
+                  "enum": ["SUBJECT", "PARTICIPATION", "OBJECT", "OBJECTIVE", "SUBJECTIVE"]
+                },
+                "payload": {},
+                "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": ["episodeId", "elementType", "payload", "version", "updatedAt"],
+              "additionalProperties": false
+            }
+          },
+          "attemptsUsed": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "referenceReady": { "type": "boolean" },
+          "canEdit": { "type": "boolean" },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": ["id", "answers", "attemptsUsed", "referenceReady", "canEdit", "serverTime"],
+        "additionalProperties": false
+      },
+      "DraftSaved": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "qualificationId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "answer": {
+            "type": "object",
+            "properties": {
+              "episodeId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "elementType": {
+                "type": "string",
+                "enum": ["SUBJECT", "PARTICIPATION", "OBJECT", "OBJECTIVE", "SUBJECTIVE"]
+              },
+              "payload": {},
+              "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": ["episodeId", "elementType", "payload", "version", "updatedAt"],
+            "additionalProperties": false
+          },
+          "conflict": { "type": "boolean" }
+        },
+        "required": ["qualificationId", "answer", "conflict"],
+        "additionalProperties": false
+      },
+      "Score": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "qualificationId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "investigator": { "type": "string" },
+          "attemptNumber": { "type": "integer", "minimum": 1, "maximum": 3 },
+          "totalScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "referenceRevision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "scoredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "breakdown": {
+            "type": "object",
+            "properties": {
+              "episodes": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "episodeId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "episodeNumber": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "weight": { "type": "number", "exclusiveMinimum": 0 },
+                    "score": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "elements": {
+                      "minItems": 5,
+                      "maxItems": 5,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "element": {
+                            "type": "string",
+                            "enum": [
+                              "SUBJECT",
+                              "PARTICIPATION",
+                              "OBJECT",
+                              "OBJECTIVE",
+                              "SUBJECTIVE"
+                            ]
+                          },
+                          "points": { "type": "number", "minimum": 0, "maximum": 50 },
+                          "max": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+                          "f1": { "type": "number", "minimum": 0, "maximum": 1 },
+                          "fields": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": { "type": "string" },
+                                "f1": { "type": "number", "minimum": 0, "maximum": 1 }
+                              },
+                              "required": ["field", "f1"]
+                            }
+                          }
+                        },
+                        "required": ["element", "points", "max", "f1", "fields"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["episodeId", "episodeNumber", "weight", "score", "elements"],
+                  "additionalProperties": false
+                }
+              },
+              "total": { "type": "number", "minimum": 0, "maximum": 100 }
+            },
+            "required": ["episodes", "total"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "qualificationId",
+          "createdBy",
+          "investigator",
+          "attemptNumber",
+          "totalScore",
+          "referenceRevision",
+          "scoredAt",
+          "breakdown"
+        ],
+        "additionalProperties": false
+      },
+      "ScoreHistory": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "qualificationId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "createdBy": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "investigator": { "type": "string" },
+                "attemptNumber": { "type": "integer", "minimum": 1, "maximum": 3 },
+                "totalScore": { "type": "number", "minimum": 0, "maximum": 100 },
+                "referenceRevision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "scoredAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "breakdown": {
+                  "type": "object",
+                  "properties": {
+                    "episodes": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "episodeId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "episodeNumber": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "weight": { "type": "number", "exclusiveMinimum": 0 },
+                          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+                          "elements": {
+                            "minItems": 5,
+                            "maxItems": 5,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "element": {
+                                  "type": "string",
+                                  "enum": [
+                                    "SUBJECT",
+                                    "PARTICIPATION",
+                                    "OBJECT",
+                                    "OBJECTIVE",
+                                    "SUBJECTIVE"
+                                  ]
+                                },
+                                "points": { "type": "number", "minimum": 0, "maximum": 50 },
+                                "max": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+                                "f1": { "type": "number", "minimum": 0, "maximum": 1 },
+                                "fields": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "field": { "type": "string" },
+                                      "f1": { "type": "number", "minimum": 0, "maximum": 1 }
+                                    },
+                                    "required": ["field", "f1"]
+                                  }
+                                }
+                              },
+                              "required": ["element", "points", "max", "f1", "fields"],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": ["episodeId", "episodeNumber", "weight", "score", "elements"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": { "type": "number", "minimum": 0, "maximum": 100 }
+                  },
+                  "required": ["episodes", "total"],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "qualificationId",
+                "createdBy",
+                "investigator",
+                "attemptNumber",
+                "totalScore",
+                "referenceRevision",
+                "scoredAt",
+                "breakdown"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "best": {
+            "anyOf": [{ "type": "number", "minimum": 0, "maximum": 100 }, { "type": "null" }]
+          },
+          "attemptsUsed": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "maxAttempts": { "type": "number", "const": 3 }
+        },
+        "required": ["items", "best", "attemptsUsed", "maxAttempts"],
+        "additionalProperties": false
+      },
+      "CreateCase": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "caseNumber": { "type": "string", "pattern": "^\\d{1,3}-\\d{4}-\\d{3,8}$" },
+          "title": { "type": "string", "minLength": 3, "maxLength": 160 },
+          "summary": { "type": "string", "minLength": 20, "maxLength": 2000 },
+          "initialFacts": { "type": "string", "minLength": 20, "maxLength": 8000 },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "jkArticles": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": { "type": "string", "pattern": "^\\d{1,3}(?:-\\d{1,2})?$" }
+          },
+          "episodes": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "episodeNumber": { "type": "integer", "minimum": 1, "maximum": 100 },
+                "description": { "type": "string", "minLength": 10, "maxLength": 8000 },
+                "jkArticle": { "type": "string", "pattern": "^\\d{1,3}(?:-\\d{1,2})?$" },
+                "location": { "type": "string", "minLength": 2, "maxLength": 200 },
+                "dateTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "weight": { "default": 1, "type": "number", "exclusiveMinimum": 0, "maximum": 100 }
+              },
+              "required": ["episodeNumber", "description", "jkArticle", "location", "dateTime"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "caseNumber",
+          "title",
+          "summary",
+          "initialFacts",
+          "openedAt",
+          "deadlineAt",
+          "departmentId",
+          "jkArticles",
+          "episodes"
+        ],
+        "additionalProperties": false
+      },
+      "CreatePerson": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "fullName": { "type": "string", "minLength": 2, "maxLength": 160 },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "gender": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
+          "address": { "type": "string", "minLength": 5, "maxLength": 500 },
+          "pinfl": {
+            "default": null,
+            "anyOf": [{ "type": "string", "pattern": "^\\d{14}$" }, { "type": "null" }]
+          },
+          "photoUrl": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\/suspects\\/(?:letter|station|museum|phone|room|thread)\\.webp$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "role": { "type": "string", "enum": ["SUSPECT", "WITNESS", "VICTIM", "OTHER"] }
+        },
+        "required": ["fullName", "birthDate", "gender", "address", "role"],
+        "additionalProperties": false
+      },
+      "WriteDraft": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "episodeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "payload": {},
+          "baseVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 }
+        },
+        "required": ["episodeId", "payload", "baseVersion"],
+        "additionalProperties": false
+      },
+      "WriteReference": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "answers": {
+            "minItems": 5,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "episodeId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "elementType": {
+                  "type": "string",
+                  "enum": ["SUBJECT", "PARTICIPATION", "OBJECT", "OBJECTIVE", "SUBJECTIVE"]
+                },
+                "payload": {}
+              },
+              "required": ["episodeId", "elementType", "payload"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["revision", "answers"],
+        "additionalProperties": false
+      },
+      "Submit": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "qualificationId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": ["qualificationId"],
+        "additionalProperties": false
+      },
+      "Reassign": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "reason": { "type": "string", "minLength": 5, "maxLength": 1000 }
+        },
+        "required": ["userId", "reason"],
+        "additionalProperties": false
+      },
+      "Resume": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "reason": { "type": "string", "minLength": 5, "maxLength": 1000 }
+        },
+        "required": ["deadlineAt", "reason"],
+        "additionalProperties": false
+      },
+      "UpdateUser": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "role": { "type": "string", "enum": ["USER", "HEAD", "PROSECUTOR", "ADMIN", "AUDITOR"] },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "banned": { "type": "boolean" }
+        },
+        "required": ["role", "departmentId", "banned"],
+        "additionalProperties": false
+      },
+      "Users": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "email": {
+                  "type": "string",
+                  "maxLength": 254,
+                  "format": "email",
+                  "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                },
+                "displayName": { "type": "string", "minLength": 2, "maxLength": 80 },
+                "role": {
+                  "type": "string",
+                  "enum": ["USER", "HEAD", "PROSECUTOR", "ADMIN", "AUDITOR"]
+                },
+                "points": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+                "rankName": {
+                  "type": "string",
+                  "enum": [
+                    "LIEUTENANT",
+                    "SENIOR_LIEUTENANT",
+                    "CAPTAIN",
+                    "MAJOR",
+                    "LIEUTENANT_COLONEL",
+                    "COLONEL",
+                    "MAJOR_GENERAL",
+                    "LIEUTENANT_GENERAL",
+                    "COLONEL_GENERAL",
+                    "MARSHAL"
+                  ]
+                },
+                "avatarUrl": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        { "type": "string", "format": "uri" },
+                        {
+                          "type": "string",
+                          "pattern": "^\\/api\\/media\\/(?:avatars|cases)\\/[a-f0-9-]{36}\\/[a-f0-9-]{36}\\.webp$"
+                        }
+                      ]
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "departmentId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "bannedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "email",
+                "displayName",
+                "role",
+                "points",
+                "rankName",
+                "avatarUrl",
+                "createdAt",
+                "departmentId",
+                "bannedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+        },
+        "required": ["items", "total"],
+        "additionalProperties": false
+      },
+      "Audit": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "actorId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "action": { "type": "string" },
+                "targetType": { "type": "string" },
+                "targetId": { "type": ["string", "null"] },
+                "requestId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "ip": { "type": ["string", "null"] },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "metadata": {}
+              },
+              "required": [
+                "id",
+                "actorId",
+                "action",
+                "targetType",
+                "targetId",
+                "requestId",
+                "ip",
+                "createdAt",
+                "metadata"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+        },
+        "required": ["items", "total"],
+        "additionalProperties": false
+      },
+      "Login": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": { "type": "string", "minLength": 1, "maxLength": 128 }
+        },
+        "required": ["email", "password"],
+        "additionalProperties": false
+      },
+      "DraftSUBJECT": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "maxItems": 50,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "personId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["IJROCHI", "TASHKILOTCHI", "DALOLATCHI", "YORDAMCHI"]
+            }
+          },
+          "required": ["personId", "role"],
+          "additionalProperties": false
+        }
+      },
+      "CompleteSUBJECT": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "minItems": 1,
+        "maxItems": 50,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "personId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["IJROCHI", "TASHKILOTCHI", "DALOLATCHI", "YORDAMCHI"]
+            }
+          },
+          "required": ["personId", "role"],
+          "additionalProperties": false
+        }
+      },
+      "DraftPARTICIPATION": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "maxItems": 50,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "personId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                { "type": "string", "const": "" }
+              ]
+            },
+            "role": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": ["IJROCHI", "TASHKILOTCHI", "DALOLATCHI", "YORDAMCHI"]
+                },
+                { "type": "string", "const": "" }
+              ]
+            }
+          },
+          "required": ["personId", "role"],
+          "additionalProperties": false
+        }
+      },
+      "CompletePARTICIPATION": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "maxItems": 50,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "personId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["IJROCHI", "TASHKILOTCHI", "DALOLATCHI", "YORDAMCHI"]
+            }
+          },
+          "required": ["personId", "role"],
+          "additionalProperties": false
+        }
+      },
+      "DraftOBJECT": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "maxItems": 6,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "PERSON_LIFE",
+            "PROPERTY",
+            "PUBLIC_SAFETY",
+            "STATE_AUTHORITY",
+            "PUBLIC_HEALTH",
+            "OTHER"
+          ]
+        }
+      },
+      "CompleteOBJECT": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "minItems": 1,
+        "maxItems": 6,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "PERSON_LIFE",
+            "PROPERTY",
+            "PUBLIC_SAFETY",
+            "STATE_AUTHORITY",
+            "PUBLIC_HEALTH",
+            "OTHER"
+          ]
+        }
+      },
+      "DraftOBJECTIVE": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["", "HARAKAT", "HARAKATSIZLIK"] },
+          "consequences": {
+            "maxItems": 4,
+            "type": "array",
+            "items": { "type": "string", "enum": ["MATERIAL", "PHYSICAL", "MORAL", "OTHER"] }
+          },
+          "causality": { "type": "string", "enum": ["", "MAVJUD", "YOQ"] },
+          "note": { "type": "string", "maxLength": 2000 }
+        },
+        "required": ["action", "consequences", "causality", "note"],
+        "additionalProperties": false
+      },
+      "CompleteOBJECTIVE": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["", "HARAKAT", "HARAKATSIZLIK"] },
+          "consequences": {
+            "maxItems": 4,
+            "type": "array",
+            "items": { "type": "string", "enum": ["MATERIAL", "PHYSICAL", "MORAL", "OTHER"] }
+          },
+          "causality": { "type": "string", "enum": ["", "MAVJUD", "YOQ"] },
+          "note": { "type": "string", "maxLength": 2000 }
+        },
+        "required": ["action", "consequences", "causality", "note"],
+        "additionalProperties": false
+      },
+      "DraftSUBJECTIVE": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "guilt": { "type": "string", "enum": ["", "QASDDAN", "EHTIYOTSIZLIKDAN"] },
+          "intent": { "type": "string", "enum": ["", "TOGRI", "EGRI"] },
+          "motive": {
+            "type": "string",
+            "enum": ["", "GREED", "REVENGE", "JEALOUSY", "NEGLIGENCE", "OTHER"]
+          },
+          "motiveNote": { "type": "string", "maxLength": 2000 },
+          "purpose": {
+            "type": "string",
+            "enum": ["", "ENRICHMENT", "CONCEALMENT", "INTIMIDATION", "HARM", "OTHER"]
+          },
+          "purposeNote": { "type": "string", "maxLength": 2000 }
+        },
+        "required": ["guilt", "intent", "motive", "motiveNote", "purpose", "purposeNote"],
+        "additionalProperties": false
+      },
+      "CompleteSUBJECTIVE": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "guilt": { "type": "string", "enum": ["", "QASDDAN", "EHTIYOTSIZLIKDAN"] },
+          "intent": { "type": "string", "enum": ["", "TOGRI", "EGRI"] },
+          "motive": {
+            "type": "string",
+            "enum": ["", "GREED", "REVENGE", "JEALOUSY", "NEGLIGENCE", "OTHER"]
+          },
+          "motiveNote": { "type": "string", "maxLength": 2000 },
+          "purpose": {
+            "type": "string",
+            "enum": ["", "ENRICHMENT", "CONCEALMENT", "INTIMIDATION", "HARM", "OTHER"]
+          },
+          "purposeNote": { "type": "string", "maxLength": 2000 }
+        },
+        "required": ["guilt", "intent", "motive", "motiveNote", "purpose", "purposeNote"],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "required": ["success", "error", "requestId"],
+        "properties": {
+          "success": { "const": false },
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": { "code": { "type": "string" }, "message": { "type": "string" } }
+          },
+          "requestId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "Reference": {
+        "type": "object",
+        "required": ["revision", "weights", "answers"],
+        "properties": {
+          "revision": { "type": "integer", "minimum": 0 },
+          "weights": {
+            "type": "object",
+            "properties": {
+              "SUBJECT": { "const": 50 },
+              "PARTICIPATION": { "const": 12.5 },
+              "OBJECT": { "const": 12.5 },
+              "OBJECTIVE": { "const": 12.5 },
+              "SUBJECTIVE": { "const": 12.5 }
+            }
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["episodeId", "elementType", "payload"],
+              "properties": {
+                "episodeId": { "type": "string", "format": "uuid" },
+                "elementType": {
+                  "enum": ["SUBJECT", "PARTICIPATION", "OBJECT", "OBJECTIVE", "SUBJECTIVE"]
+                },
+                "payload": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/CompleteSUBJECT" },
+                    { "$ref": "#/components/schemas/CompletePARTICIPATION" },
+                    { "$ref": "#/components/schemas/CompleteOBJECT" },
+                    { "$ref": "#/components/schemas/CompleteOBJECTIVE" },
+                    { "$ref": "#/components/schemas/CompleteSUBJECTIVE" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "TokenSession": {
+        "type": "object",
+        "required": ["accessToken", "tokenType", "expiresIn", "user"],
+        "properties": {
+          "accessToken": { "type": "string" },
+          "tokenType": { "const": "Bearer" },
+          "expiresIn": { "const": 900 },
+          "user": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "email": {
+                "type": "string",
+                "maxLength": 254,
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              "displayName": { "type": "string", "minLength": 2, "maxLength": 80 },
+              "role": {
+                "type": "string",
+                "enum": ["USER", "HEAD", "PROSECUTOR", "ADMIN", "AUDITOR"]
+              },
+              "points": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "rankName": {
+                "type": "string",
+                "enum": [
+                  "LIEUTENANT",
+                  "SENIOR_LIEUTENANT",
+                  "CAPTAIN",
+                  "MAJOR",
+                  "LIEUTENANT_COLONEL",
+                  "COLONEL",
+                  "MAJOR_GENERAL",
+                  "LIEUTENANT_GENERAL",
+                  "COLONEL_GENERAL",
+                  "MARSHAL"
+                ]
+              },
+              "avatarUrl": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      { "type": "string", "format": "uri" },
+                      {
+                        "type": "string",
+                        "pattern": "^\\/api\\/media\\/(?:avatars|cases)\\/[a-f0-9-]{36}\\/[a-f0-9-]{36}\\.webp$"
+                      }
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "displayName",
+              "role",
+              "points",
+              "rankName",
+              "avatarUrl",
+              "createdAt"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "Suspend": {
+        "type": "object",
+        "required": ["reason"],
+        "properties": { "reason": { "type": "string", "minLength": 5, "maxLength": 1000 } },
+        "additionalProperties": false
+      }
+    }
+  }
+}

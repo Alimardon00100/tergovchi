@@ -1,0 +1,56 @@
+﻿[
+  {
+    "rank": "LIEUTENANT",
+    "source": "Code_Generated_Image (2).png",
+    "asset": "/ranks/lieutenant.png",
+    "sha256": "f373e4bd4afa089438de860c8e18d20de0d72d07f49248e7bb103a422a4343a7"
+  },
+  {
+    "rank": "SENIOR_LIEUTENANT",
+    "source": "Code_Generated_Image.png",
+    "asset": "/ranks/senior_lieutenant.png",
+    "sha256": "1095fb7985eab7dad01685a1a1281e5ad89b58a5d5e2c9a176032fca9ff4bf11"
+  },
+  {
+    "rank": "CAPTAIN",
+    "source": "Code_Generated_Image (3).png",
+    "asset": "/ranks/captain.png",
+    "sha256": "b78d5f06e3ef65d1bc8b6cd0cda1bdc97ead759732c6f78d57f7e955ff63b612"
+  },
+  {
+    "rank": "MAJOR",
+    "source": "Code_Generated_Image (4).png",
+    "asset": "/ranks/major.png",
+    "sha256": "d13fc31f88d61bbbd19150507a86267d663186326895dbfd75abb969f9d0ecad"
+  },
+  {
+    "rank": "LIEUTENANT_COLONEL",
+    "source": "Code_Generated_Image (5).png",
+    "asset": "/ranks/lieutenant_colonel.png",
+    "sha256": "4cc9b2738238920c638eff1d162be0ea6c644ecdb42238356cf46fe3b3558780"
+  },
+  {
+    "rank": "COLONEL",
+    "source": "Code_Generated_Image (6).png",
+    "asset": "/ranks/colonel.png",
+    "sha256": "465e5f55d7766e0e9991d9884e4d7708f2fdaac4f4e3e8e0a584770be6aaa64b"
+  },
+  {
+    "rank": "MAJOR_GENERAL",
+    "source": "Code_Generated_Image (7).png",
+    "asset": "/ranks/major_general.png",
+    "sha256": "4591ff40cfbcaa5c18507435b540adce612a19d945c66cc04670d911787d43b1"
+  },
+  {
+    "rank": "LIEUTENANT_GENERAL",
+    "source": "Code_Generated_Image (9).png",
+    "asset": "/ranks/lieutenant_general.png",
+    "sha256": "fca0dd793e49172725b13010faf1a7aefd9fcb6e8ad3c4f772d7f1038dcb1132"
+  },
+  {
+    "rank": "COLONEL_GENERAL",
+    "source": "Code_Generated_Image (8).png",
+    "asset": "/ranks/colonel_general.png",
+    "sha256": "6e91cdd387dbf42bffffc926bbf4c49ff7f11f207e1857e0de3920cf8e7ed83a"
+  }
+]

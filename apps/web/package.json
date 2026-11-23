@@ -1,0 +1,43 @@
+{
+  "name": "@detective/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "dev": "vite",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@detective/shared": "workspace:*",
+    "@detective/ui": "workspace:*",
+    "@fontsource/playfair-display": "5",
+    "@fontsource/special-elite": "5",
+    "@hookform/resolvers": "5",
+    "@radix-ui/react-dialog": "1",
+    "@radix-ui/react-select": "2",
+    "@tanstack/react-query": "5",
+    "clsx": "2.1.1",
+    "framer-motion": "12",
+    "lucide-react": "1.77.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-hook-form": "7",
+    "react-router-dom": "7.18.6",
+    "sonner": "2",
+    "tailwind-merge": "3.7.1",
+    "zod": "4.6.6",
+    "zustand": "5"
+  },
+  "devDependencies": {
+    "@detective/config": "workspace:*",
+    "@types/react": "18.3.20",
+    "@types/react-dom": "18.3.6",
+    "@vitejs/plugin-react": "6",
+    "autoprefixer": "10.7.0",
+    "postcss": "8.5.33",
+    "tailwindcss": "3",
+    "vite": "8"
+  }
+}

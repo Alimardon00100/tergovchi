@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+node_modules
+.cache
+.tools
+.local
+.turbo
+dist
+coverage
+**/migration.sql
+apps/web/public/assets/backgrounds

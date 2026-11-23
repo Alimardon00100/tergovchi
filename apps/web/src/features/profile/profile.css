@@ -1,0 +1,1871 @@
+﻿.metal-safe-scene {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  color: #dfd5b7;
+}
+.metal-safe-sign {
+  position: absolute;
+  top: 1.5%;
+  left: 44%;
+  width: min(430px, 29vw);
+  transform: translateX(-50%) rotate(-0.6deg);
+  padding: 12px 20px 10px;
+  text-align: center;
+  color: #352d20;
+  box-shadow: 2px 6px 10px #000b;
+  z-index: 5;
+}
+.metal-safe-sign > span {
+  font:
+    12px 'Courier New',
+    monospace;
+  letter-spacing: 0.08em;
+}
+.metal-safe-sign h1 {
+  font:
+    clamp(24px, 2.35vw, 34px)/1.3 'Special Elite',
+    'Courier New',
+    monospace;
+  margin: 5px 0;
+}
+.metal-safe-sign p {
+  font-size: 13px;
+  line-height: 1.3;
+}
+.metal-safe {
+  position: absolute;
+  left: 13.7%;
+  top: 18%;
+  width: 54vw;
+  max-width: 900px;
+  height: 79dvh;
+  max-height: 800px;
+  perspective: 2100px;
+  perspective-origin: 100% 50%;
+  transform-style: preserve-3d;
+}
+.metal-cabinet {
+  position: absolute;
+  inset: 0;
+}
+.metal-cabinet-skin {
+  position: absolute;
+  inset: 0;
+  filter: drop-shadow(9px 15px 15px #000b);
+}
+.metal-cabinet-skin > i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-image: url('/scenes/vault-interior.webp');
+  background-repeat: no-repeat;
+}
+.metal-cabinet-skin > i:nth-child(1) {
+  top: 0;
+  height: 45%;
+  background-size: 100% 222.222222%;
+  background-position: center top;
+}
+.metal-cabinet-skin > i:nth-child(2) {
+  top: 45%;
+  height: 25%;
+  background-size: 100% 400%;
+  background-position: center 60%;
+}
+.metal-cabinet-skin > i:nth-child(3) {
+  top: 70%;
+  bottom: 0;
+  background-size: 100% 333.333333%;
+  background-position: center bottom;
+}
+.metal-tool-shelf {
+  position: absolute;
+  left: 12%;
+  right: 10%;
+  top: 7%;
+  height: 35%;
+}
+.metal-tool-shelf h2,
+.metal-case-shelf h2 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font:
+    14px 'Courier New',
+    monospace;
+  text-shadow: 1px 2px 2px #000;
+  color: #e8dfc5;
+}
+.metal-tool-shelf h2 {
+  letter-spacing: 0.03em;
+}
+.metal-equipment {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  bottom: 0;
+  height: 85%;
+  overflow: visible;
+}
+.metal-case-shelf {
+  position: absolute;
+  left: 12%;
+  right: 10%;
+}
+.metal-opened {
+  top: 46.5%;
+  height: 21%;
+}
+.metal-unopened {
+  top: 71.5%;
+  bottom: 7%;
+}
+.metal-case-shelf h2 {
+  right: 0;
+  font-size: 13px;
+}
+.metal-case-shelf h2 small {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font: 12px 'Courier New';
+  color: #cdc9b3;
+}
+.metal-folders {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 35px;
+  bottom: 22px;
+}
+.metal-case {
+  position: absolute;
+  bottom: 0;
+  width: 41%;
+  height: 100%;
+  max-height: 125px;
+  color: #322b1c;
+  background: linear-gradient(110deg, #d8c18b, #c4a875 75%, #b39864);
+  border: 1px solid #96805a;
+  box-shadow:
+    2px 5px 7px #0009,
+    inset 1px 1px #e0d3a7;
+}
+.metal-case--0 {
+  left: 0;
+  rotate: -3deg;
+}
+.metal-case--1 {
+  left: 48%;
+  rotate: 2deg;
+}
+.metal-folder-tab {
+  position: absolute;
+  left: -1px;
+  bottom: 100%;
+  padding: 1px 11px 0 5px;
+  font: 10px 'Courier New';
+  background: #b69f71;
+  border: 1px solid #988058;
+  border-bottom: 0;
+  border-radius: 2px 8px 0 0;
+}
+.metal-case-number {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 6px;
+  font: 11px/1.15 'Courier New';
+  padding-bottom: 3px;
+  border-bottom: 1px dashed #9c8456;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.metal-case strong {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 26px;
+  font:
+    16px/1.15 'Special Elite',
+    'Courier New',
+    monospace;
+  font-weight: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.metal-case-stamp {
+  position: absolute;
+  left: 8px;
+  bottom: 5px;
+  rotate: -3deg;
+  padding: 1px 4px;
+  border: 1px solid #8b382a;
+  box-shadow: inset 0 0 0 1px #8b382a44;
+  color: #86382c;
+  font: 10px/1.2 'Courier New';
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+}
+.metal-pagination {
+  position: absolute;
+  bottom: -5px;
+  right: 0;
+  color: #b7a27b;
+  font: 12px 'Courier New';
+  white-space: nowrap;
+}
+.metal-pagination button {
+  padding: 3px 5px;
+  font: inherit;
+  color: #dfcda2;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.metal-empty {
+  padding: 8px 0;
+  max-width: 80%;
+  color: #a5aa9b;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.metal-safe-door {
+  position: absolute;
+  inset: 2% 8%;
+  z-index: 10;
+  transform-style: preserve-3d;
+  border: 5px solid #596564;
+  background: #374242;
+  box-shadow:
+    inset 2px 2px 2px #aab3a155,
+    inset -2px -2px 3px #111a1b,
+    5px 7px 15px #0008;
+}
+.metal-door-front,
+.metal-door-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+.metal-door-front {
+  border: 10px double #202e2e;
+  background:
+    repeating-linear-gradient(0deg, #ffffff04 0 1px, transparent 1px 3px),
+    linear-gradient(120deg, #485555, #263536 70%, #3c4845);
+}
+.metal-door-back {
+  transform: rotateY(180deg);
+  background:
+    repeating-linear-gradient(0deg, #ffffff03 0 1px, transparent 1px 4px),
+    linear-gradient(115deg, #3d4949, #263638 65%, #44524f);
+  border: 8px double #1c2c2d;
+}
+.metal-profile-plate {
+  position: absolute;
+  inset: 6%;
+  border: 2px solid #9a9c8a;
+  outline: 2px solid #1f2a27;
+  outline-offset: 3px;
+  border-radius: 3px;
+  color: #dfd9bd;
+  background:
+    repeating-linear-gradient(1deg, #d2d3b50a 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 30% 10%, #80877a55, transparent 65%),
+    linear-gradient(110deg, #50594f, #414b46 55%, #50574d);
+  box-shadow:
+    inset 1px 1px 2px #d5d4b055,
+    inset -2px -2px 5px #131e1a,
+    2px 3px 8px #0008;
+  text-shadow: 1px 2px 2px #17211a;
+}
+.metal-rivet {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  z-index: 2;
+  background: radial-gradient(circle at 30% 25%, #d6d4b7, #4c594d 60%, #111f19);
+  box-shadow:
+    0 0 0 1px #242c21,
+    1px 2px 2px #162015;
+}
+.metal-rivet::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  width: 1px;
+  height: 5px;
+  background: #233024;
+  rotate: 35deg;
+}
+.metal-rivet--1 {
+  left: 6px;
+  top: 6px;
+}
+.metal-rivet--2 {
+  right: 6px;
+  top: 6px;
+}
+.metal-rivet--3 {
+  left: 6px;
+  bottom: 6px;
+}
+.metal-rivet--4 {
+  right: 6px;
+  bottom: 6px;
+}
+.metal-profile-info {
+  position: absolute;
+  inset: 0;
+}
+.metal-save {
+  position: absolute;
+  top: 9px;
+  right: 22px;
+  padding: 4px 8px;
+  background: linear-gradient(#626b5a, #424f40);
+  color: #ead6a4;
+  border: 1px solid #89927a;
+  box-shadow:
+    1px 2px 3px #172319,
+    inset 1px 1px #b4ba9866;
+  font-size: 14px;
+}
+.metal-id-photo {
+  position: absolute;
+  left: 22px;
+  top: 66px;
+  width: 76px;
+  height: 98px;
+  padding: 4px 4px 18px;
+  background: #d6c9a4;
+  border: 1px solid #a29878;
+  color: #3b3625;
+  rotate: -4deg;
+  box-shadow: 2px 3px 5px #172017;
+  text-shadow: none;
+}
+.metal-id-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+.metal-id-photo > span {
+  display: block;
+  padding-top: 3px;
+  font: 10px/1.1 'Courier New';
+  white-space: nowrap;
+}
+.metal-id-photo > small {
+  position: absolute;
+  left: -4px;
+  right: -12px;
+  top: calc(100% + 9px);
+  font: 11px/1.3 'Courier New';
+  color: #d5c8a5;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-shadow: 1px 1px #152016;
+}
+.metal-id-photo:hover {
+  rotate: -1deg;
+}
+.metal-user-details {
+  position: absolute;
+  top: 82px;
+  left: 114px;
+  right: 22px;
+}
+.metal-engraved-name {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #a49c7866;
+  border-radius: 0;
+  color: #eee5c6;
+  padding: 0 0 4px;
+  font-size: clamp(17px, 1.6vw, 23px);
+  line-height: 1.3;
+  text-shadow: 1px 2px 2px #172117;
+}
+.metal-name-error {
+  display: block;
+  color: #e6b291;
+  font: 12px 'Courier New';
+}
+.metal-user-details h2 {
+  margin-top: 11px;
+  color: #dfc579;
+  font:
+    clamp(21px, 2.1vw, 30px)/1.2 'Special Elite',
+    'Courier New',
+    monospace;
+}
+.metal-user-details > strong {
+  display: block;
+  font-size: clamp(22px, 2.2vw, 31px);
+  line-height: 1.2;
+  font-weight: normal;
+  color: #e8d492;
+}
+.metal-user-details p {
+  font-size: 15px;
+  line-height: 1.3;
+  margin: 8px 0 8px;
+}
+.metal-progress {
+  height: 6px;
+  border-block: 1px solid #b8ab7c;
+  transform: rotate(-1deg);
+}
+.metal-progress i {
+  display: block;
+  height: 3px;
+  background: repeating-linear-gradient(70deg, #bd9c52 0 2px, #7a643d 2px 4px);
+}
+.metal-epaulette {
+  position: absolute;
+  right: 22px;
+  top: 41px;
+  width: 112px;
+  height: 45px;
+  rotate: 4deg;
+  filter: drop-shadow(2px 4px 3px #162115);
+}
+.metal-button {
+  padding: 10px 15px 8px;
+  border: 2px solid #99967c;
+  outline: 1px solid #202b22;
+  outline-offset: 2px;
+  background:
+    repeating-linear-gradient(0deg, #e9dfaf06 0 1px, transparent 1px 3px),
+    linear-gradient(115deg, #4c5749, #303b32 65%, #434f40);
+  box-shadow:
+    inset 1px 1px 1px #b7b39088,
+    inset -2px -2px 2px #18241a,
+    2px 4px 5px #152014;
+  color: #e3d3a8;
+  text-shadow: 1px 2px #172116;
+  font:
+    18px/1.25 'Special Elite',
+    'Courier New',
+    monospace;
+}
+.metal-button:hover {
+  background: linear-gradient(115deg, #65705a, #3c493a 70%, #56634a);
+  color: #f5e3b2;
+}
+.metal-button:active {
+  box-shadow: inset 2px 3px 4px #172218;
+}
+.metal-account-actions {
+  position: absolute;
+  top: 55%;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.metal-motion {
+  position: absolute;
+  top: 79%;
+  left: 30px;
+  right: 20px;
+  padding-left: 25px;
+  font: 13px/1.5 'Courier New';
+  cursor: pointer;
+  color: #d7d4bd;
+}
+.metal-motion input {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  cursor: pointer;
+}
+.metal-check {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #b5ae8b;
+  background: #c5c5ae;
+  box-shadow: inset 1px 2px 2px #253628;
+}
+.metal-motion input:checked + .metal-check::after {
+  content: '✓';
+  position: absolute;
+  left: 1px;
+  top: -5px;
+  font-size: 20px;
+  color: #293a27;
+  text-shadow: none;
+}
+.metal-motion input:focus-visible + .metal-check {
+  outline: 2px solid #e8c07d;
+  outline-offset: 3px;
+}
+.metal-lock-button {
+  position: absolute;
+  bottom: 6%;
+  left: 30px;
+  right: 30px;
+  width: calc(100% - 60px);
+  font-size: 23px;
+}
+.metal-avatar-error {
+  position: absolute;
+  top: 42%;
+  left: 22px;
+  right: 22px;
+  padding: 4px 6px;
+  background: #3f2b24;
+  color: #f0c9a3;
+  font: 12px/1.3 'Courier New';
+  z-index: 3;
+}
+.metal-front-sign {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 19%;
+  padding: 20px 10px;
+  text-align: center;
+  border: 3px double #b2a477;
+  background: #313d36;
+  color: #d7c494;
+  font: 15px 'Courier New';
+  box-shadow: 2px 5px 8px #0008;
+}
+.metal-front-sign strong {
+  display: block;
+  font:
+    clamp(23px, 2.3vw, 36px)/1.5 'Special Elite',
+    'Courier New';
+  margin: 9px 0;
+}
+.metal-front-sign small {
+  display: block;
+  font-size: 12px;
+}
+.metal-keyhole {
+  position: absolute;
+  left: 23%;
+  top: 48%;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #9a9f89;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #879b88, #29392d);
+  box-shadow: 2px 3px 4px #0008;
+}
+.metal-keyhole::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 6px;
+  width: 3px;
+  height: 13px;
+  background: #13231b;
+}
+.metal-door-handle {
+  position: absolute;
+  left: 24%;
+  top: 61%;
+  width: 24px;
+  height: 17%;
+  border: 6px solid #869684;
+  border-radius: 5px;
+  box-shadow:
+    3px 4px 5px #0009,
+    inset 1px 1px #c5cab1;
+}
+.metal-front-open {
+  position: absolute;
+  bottom: 7%;
+  left: 22%;
+  right: 22%;
+  font-size: 17px;
+}
+.metal-loading {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: min(400px, 85vw);
+  transform: translateX(-50%) rotate(-2deg);
+  color: #463523;
+  padding: 30px;
+  text-align: center;
+}
+.metal-loading button {
+  margin-top: 20px;
+  color: #862f25;
+  background: transparent;
+  text-decoration: underline;
+}
+.metal-password-paper {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-0.5deg);
+  width: min(520px, 92vw);
+  max-height: 90dvh;
+  overflow-y: auto;
+  z-index: 60;
+  padding: 35px 40px 30px;
+  color: #3e2f1e;
+  font-family: 'Special Elite', 'Courier New', monospace;
+  box-shadow: 6px 16px 35px #0009;
+}
+.metal-password-paper h2 {
+  font:
+    28px/1.3 'Special Elite',
+    'Courier New';
+  margin: 13px 0 8px;
+}
+.metal-password-paper [id$='description'] {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.metal-paper-classification {
+  font: 11px 'Courier New';
+  letter-spacing: 0.1em;
+}
+.metal-paper-close {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  padding: 3px 8px;
+  background: transparent;
+  color: #7c3025;
+  font-size: 27px;
+}
+.metal-paper-field {
+  display: block;
+  margin-top: 22px;
+  font-size: 16px;
+}
+.metal-paper-field input {
+  display: block;
+  width: 100%;
+  padding: 8px 0 5px;
+  border: 0;
+  border-bottom: 1px dashed #897244;
+  border-radius: 0;
+  background: transparent;
+  color: #3d2c19;
+  font: 20px 'Courier New';
+  box-shadow: none;
+}
+.metal-paper-field small {
+  display: block;
+  min-height: 0;
+  font: 13px/1.4 'Courier New';
+  color: #8c3024;
+  margin-top: 5px;
+}
+.metal-password-hint {
+  font: 13px/1.5 'Courier New';
+  margin-top: 16px;
+  color: #715a38;
+}
+.metal-password-error {
+  font: 14px/1.5 'Courier New';
+  margin-top: 15px;
+  color: #8a2b20;
+  border-left: 2px solid #8a2b20;
+  padding-left: 10px;
+}
+.metal-password-stamp {
+  margin-top: 24px;
+  rotate: -2deg;
+  font-family: 'Special Elite', 'Courier New';
+  border: 3px double #7c3023;
+  box-shadow: 2px 4px 2px #4a2a1766;
+}
+.metal-paper-seal {
+  position: absolute;
+  bottom: 35px;
+  right: 33px;
+  width: 66px;
+  height: 66px;
+  border: 3px double #793224;
+  border-radius: 50%;
+  rotate: 14deg;
+  text-align: center;
+  padding-top: 16px;
+  color: #793224;
+  font: 10px/1.3 'Courier New';
+  opacity: 0.6;
+  pointer-events: none;
+}
+@media (min-width: 651px) and (max-height: 700px) {
+  .metal-safe-sign {
+    padding: 7px 15px;
+  }
+  .metal-safe-sign h1 {
+    font-size: 26px;
+    margin: 3px 0;
+  }
+  .metal-safe-sign p {
+    font-size: 12px;
+  }
+  .metal-safe {
+    top: 18%;
+    height: 79dvh;
+  }
+  .metal-tool-shelf h2,
+  .metal-case-shelf h2 {
+    font-size: 11px;
+  }
+  .metal-case-shelf h2 small {
+    font-size: 10px;
+  }
+  .metal-folders {
+    top: 25px;
+    bottom: 17px;
+  }
+  .metal-case strong {
+    font-size: 13px;
+    top: 20px;
+    -webkit-line-clamp: 1;
+  }
+  .metal-case-number {
+    font-size: 9px;
+    top: 4px;
+    padding-bottom: 2px;
+  }
+  .metal-case-stamp {
+    font-size: 9px;
+    bottom: 3px;
+  }
+  .metal-pagination {
+    font-size: 10px;
+  }
+  .metal-id-photo {
+    top: 53px;
+    left: 15px;
+    width: 60px;
+    height: 79px;
+  }
+  .metal-id-photo > small {
+    font-size: 9px;
+  }
+  .metal-user-details {
+    top: 65px;
+    left: 91px;
+    right: 17px;
+  }
+  .metal-engraved-name {
+    font-size: 17px;
+  }
+  .metal-user-details h2 {
+    font-size: 21px;
+    margin-top: 7px;
+  }
+  .metal-user-details > strong {
+    font-size: 22px;
+  }
+  .metal-user-details p {
+    font-size: 12px;
+    margin: 5px 0;
+  }
+  .metal-epaulette {
+    top: 32px;
+    right: 17px;
+    width: 90px;
+    height: 36px;
+  }
+  .metal-save {
+    top: 7px;
+    font-size: 12px;
+    padding: 1px 6px;
+  }
+  .metal-account-actions {
+    top: 56%;
+    left: 22px;
+    right: 22px;
+    gap: 10px;
+  }
+  .metal-account-actions .metal-button {
+    padding: 7px 8px 5px;
+    font-size: 16px;
+  }
+  .metal-motion {
+    top: 81%;
+    left: 22px;
+    font-size: 11px;
+  }
+  .metal-lock-button {
+    left: 22px;
+    right: 22px;
+    width: calc(100% - 44px);
+    bottom: 4%;
+    font-size: 19px;
+    padding: 5px;
+  }
+}
+@media (max-width: 650px) {
+  .metal-safe-sign {
+    left: 50%;
+    width: 85vw;
+    top: 2%;
+    padding: 9px 12px;
+  }
+  .metal-safe-sign h1 {
+    font-size: 25px;
+  }
+  .metal-safe-sign p {
+    display: none;
+  }
+  .metal-safe {
+    left: 3%;
+    top: 17%;
+    width: 94vw;
+    height: 73dvh;
+    perspective: 1600px;
+  }
+  .metal-safe[data-panel='profile'][data-state='open'] .metal-cabinet {
+    visibility: hidden;
+  }
+  .metal-safe-door {
+    inset: 2% 4%;
+  }
+  .metal-profile-plate {
+    inset: 4%;
+  }
+  .metal-user-details {
+    top: 94px;
+    left: 106px;
+    right: 17px;
+  }
+  .metal-engraved-name {
+    font-size: 17px;
+  }
+  .metal-user-details h2 {
+    font-size: 22px;
+    margin-top: 10px;
+  }
+  .metal-user-details > strong {
+    font-size: 25px;
+  }
+  .metal-user-details p {
+    font-size: 13px;
+    margin: 9px 0;
+  }
+  .metal-id-photo {
+    top: 75px;
+    left: 18px;
+    width: 69px;
+    height: 93px;
+  }
+  .metal-epaulette {
+    top: 43px;
+    width: 107px;
+    right: 20px;
+  }
+  .metal-account-actions {
+    top: 56%;
+    left: 23px;
+    right: 23px;
+    gap: 15px;
+  }
+  .metal-account-actions .metal-button {
+    font-size: 17px;
+    padding: 10px 5px 8px;
+  }
+  .metal-motion {
+    top: 80%;
+    left: 23px;
+    font-size: 11px;
+  }
+  .metal-lock-button {
+    left: 23px;
+    right: 23px;
+    width: calc(100% - 46px);
+    bottom: 5%;
+    font-size: 22px;
+  }
+  .metal-view-switch {
+    position: absolute;
+    bottom: 3%;
+    right: 5%;
+    display: flex;
+    gap: 9px;
+    z-index: 20;
+  }
+  .metal-view-switch .metal-button {
+    font-size: 13px;
+    padding: 8px 9px 6px;
+  }
+  .metal-view-switch [aria-pressed='true'] {
+    color: #f7de9c;
+    border-color: #c5a967;
+    box-shadow: inset 1px 2px 5px #101c13;
+  }
+  .metal-tool-shelf h2,
+  .metal-case-shelf h2 {
+    font-size: 12px;
+  }
+  .metal-case-shelf h2 small {
+    font-size: 10px;
+  }
+  .metal-folders {
+    top: 30px;
+    bottom: 20px;
+  }
+  .metal-case {
+    width: 45%;
+  }
+  .metal-case--1 {
+    left: 53%;
+  }
+  .metal-case strong {
+    font-size: 14px;
+    top: 23px;
+  }
+  .metal-case-number {
+    font-size: 9px;
+  }
+  .metal-case-stamp {
+    font-size: 9px;
+  }
+  .metal-pagination {
+    font-size: 11px;
+  }
+  .metal-password-paper {
+    padding: 28px 23px;
+  }
+  .metal-password-paper h2 {
+    font-size: 24px;
+  }
+  .metal-paper-seal {
+    display: none;
+  }
+}
+@media (max-width: 650px) and (max-height: 680px) {
+  .metal-safe-sign {
+    padding: 6px 10px;
+  }
+  .metal-safe-sign h1 {
+    font-size: 23px;
+    margin: 2px 0;
+  }
+  .metal-safe {
+    top: 17%;
+    height: 72dvh;
+  }
+  .metal-user-details {
+    top: 69px;
+    left: 89px;
+    right: 14px;
+  }
+  .metal-engraved-name {
+    font-size: 15px;
+  }
+  .metal-user-details h2 {
+    font-size: 20px;
+    margin-top: 7px;
+  }
+  .metal-user-details > strong {
+    font-size: 22px;
+  }
+  .metal-user-details p {
+    font-size: 12px;
+    margin: 4px 0;
+  }
+  .metal-id-photo {
+    top: 65px;
+    left: 15px;
+    width: 58px;
+    height: 78px;
+  }
+  .metal-id-photo > small {
+    font-size: 9px;
+  }
+  .metal-epaulette {
+    top: 30px;
+    right: 17px;
+    width: 89px;
+    height: 35px;
+  }
+  .metal-save {
+    top: 7px;
+    font-size: 12px;
+    padding: 1px 6px;
+  }
+  .metal-account-actions {
+    top: 58%;
+    gap: 9px;
+  }
+  .metal-account-actions .metal-button {
+    font-size: 15px;
+    padding: 7px 4px 5px;
+  }
+  .metal-motion {
+    top: 81%;
+    font-size: 10px;
+  }
+  .metal-lock-button {
+    font-size: 19px;
+    padding: 5px;
+    bottom: 3%;
+  }
+  .metal-tool-shelf h2,
+  .metal-case-shelf h2 {
+    font-size: 10px;
+  }
+  .metal-case-shelf h2 small {
+    font-size: 9px;
+  }
+  .metal-folders {
+    top: 23px;
+    bottom: 16px;
+  }
+  .metal-case strong {
+    font-size: 12px;
+    top: 19px;
+    -webkit-line-clamp: 1;
+  }
+  .metal-case-number {
+    top: 3px;
+    padding-bottom: 2px;
+    font-size: 8px;
+  }
+  .metal-case-stamp {
+    font-size: 8px;
+    bottom: 3px;
+    padding: 0 2px;
+  }
+  .metal-password-paper h2 {
+    font-size: 22px;
+  }
+  .metal-paper-field {
+    margin-top: 17px;
+  }
+}
+.metal-case strong {
+  -webkit-line-clamp: 1;
+}
+@media (min-width: 651px) and (max-height: 700px) {
+  .metal-user-details {
+    top: 50px;
+  }
+  .metal-epaulette {
+    top: 20px;
+    width: 79px;
+    height: 28px;
+  }
+  .metal-account-actions {
+    top: 54%;
+  }
+  .metal-account-actions .metal-button {
+    padding: 6px 5px;
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  .metal-motion {
+    top: 79%;
+  }
+}
+@media (max-width: 650px) and (max-height: 680px) {
+  .metal-user-details {
+    top: 48px;
+  }
+  .metal-user-details h2 {
+    font-size: 18px;
+    line-height: 1.1;
+  }
+  .metal-user-details > strong {
+    font-size: 21px;
+  }
+  .metal-user-details p {
+    font-size: 11.5px;
+  }
+  .metal-id-photo {
+    top: 52px;
+  }
+  .metal-epaulette {
+    top: 10px;
+    width: 82px;
+    height: 30px;
+  }
+  .metal-save {
+    left: 12px;
+    right: auto;
+    top: 9px;
+  }
+}
+.metal-safe-sign > span {
+  display: block;
+  line-height: 1.2;
+}
+@media (min-width: 651px) and (max-height: 700px) {
+  .metal-folders {
+    bottom: 12px;
+  }
+  .metal-safe-sign p {
+    font-size: 10px;
+  }
+  .metal-safe-sign h1 {
+    font-size: 23px;
+  }
+  .metal-safe-sign > span {
+    font-size: 10px;
+  }
+}
+@media (max-width: 650px) and (max-height: 680px) {
+  .metal-folders {
+    bottom: 12px;
+  }
+}
+@media (max-width: 650px) and (max-height: 680px) {
+  .metal-account-actions {
+    top: 56%;
+  }
+  .metal-motion {
+    top: 79%;
+  }
+}
+.metal-safe[data-state='closed'] .metal-tool-shelf,
+.metal-safe[data-state='closed'] .metal-case-shelf {
+  visibility: hidden;
+}
+/* v11: real rank photographs, clickable service record, and folder thumbnails. */
+.rank-photograph {
+  display: block;
+  width: 104px;
+  aspect-ratio: 896 / 1200;
+  filter: drop-shadow(2px 4px 3px #0009);
+  pointer-events: none;
+}
+.rank-photograph > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(40% 5.3%, 60% 5.3%, 76.4% 17.5%, 76.4% 94.6%, 23.6% 94.6%, 23.6% 17.5%);
+}
+.rank-photograph--marshal {
+  width: 110px;
+  aspect-ratio: 2 / 1;
+}
+.rank-photograph--marshal > img {
+  clip-path: none;
+}
+.safe-summary {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 49px;
+  height: 43%;
+  padding: 0;
+  border: 1px solid #c7bd9155;
+  border-radius: 1px;
+  background: repeating-linear-gradient(1deg, #d7d0a305 0 1px, transparent 1px 4px), #25352a33;
+  box-shadow:
+    inset 1px 2px 3px #18291b88,
+    1px 1px 1px #c6be8c33;
+  color: #e2d8b6;
+  text-align: left;
+}
+.safe-summary:hover {
+  background-color: #5a654733;
+  border-color: #dcc389;
+}
+.safe-summary .metal-id-photo {
+  display: block;
+  top: 15px;
+  left: 12px;
+  width: 76px;
+  height: 98px;
+}
+.safe-summary-details {
+  position: absolute;
+  left: 105px;
+  right: 78px;
+  top: 17px;
+}
+.safe-summary-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font:
+    20px/1.3 'Special Elite',
+    'Courier New',
+    monospace;
+  color: #f0e4c3;
+  font-weight: normal;
+}
+.safe-summary-rank {
+  display: block;
+  margin-top: 10px;
+  color: #e5ca7d;
+  font:
+    26px/1.2 'Special Elite',
+    'Courier New',
+    monospace;
+}
+.safe-summary-points {
+  display: block;
+  font:
+    27px/1.2 'Special Elite',
+    'Courier New',
+    monospace;
+  color: #ead596;
+}
+.summary-rank {
+  position: absolute;
+  top: 9px;
+  right: -8px;
+  width: 93px;
+}
+.summary-rank.rank-photograph--marshal {
+  top: 15px;
+  right: 3px;
+  width: 80px;
+}
+.summary-progress-note {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 27px;
+  font:
+    15px/1.3 'Special Elite',
+    'Courier New',
+    monospace;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.summary-progress {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+}
+.metal-case-thumbnail {
+  position: absolute;
+  left: 7px;
+  top: 25px;
+  bottom: 6px;
+  width: 27%;
+  padding: 3px 3px 6px;
+  rotate: -4deg;
+  background: #d9ceaa;
+  box-shadow: 1px 2px 3px #40301d77;
+}
+.metal-case-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  filter: sepia(0.4) saturate(0.65);
+}
+.metal-case strong {
+  left: 38%;
+  right: 7px;
+  top: 26px;
+}
+.metal-case-stamp {
+  left: auto;
+  right: 7px;
+}
+.metal-pagination .shelf-all-button {
+  margin-left: 7px;
+  padding: 4px 6px 3px;
+  rotate: -3deg;
+  border: 1px solid #927743;
+  background: linear-gradient(110deg, #d6c296, #b7a071);
+  box-shadow: 1px 2px 3px #0009;
+  color: #49311e;
+  text-decoration: none;
+}
+.metal-pagination .shelf-all-button:hover {
+  background: #e1c994;
+  color: #7c2f21;
+}
+.profile-document,
+.all-cases-document {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 70;
+  padding: 30px 34px;
+  color: #3d2e1e;
+  font-family: 'Special Elite', 'Courier New', monospace;
+  box-shadow: 7px 18px 40px #000a;
+}
+.profile-document {
+  width: min(850px, 94vw);
+  height: min(760px, 90dvh);
+}
+.profile-document h2,
+.all-cases-document h2 {
+  font:
+    29px/1.3 'Special Elite',
+    'Courier New',
+    monospace;
+  margin: 12px 0 6px;
+}
+.profile-document > p,
+.all-cases-document > p {
+  font:
+    14px/1.4 'Special Elite',
+    'Courier New',
+    monospace;
+}
+.profile-document-body {
+  position: absolute;
+  left: 33px;
+  right: 30px;
+  top: 125px;
+  bottom: 86px;
+  overflow-y: auto;
+  padding: 7px 10px 24px 4px;
+  scrollbar-color: #9e8052 #cab686;
+  scrollbar-width: thin;
+}
+.document-identity {
+  position: relative;
+  min-height: 350px;
+}
+.document-avatar {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 98px;
+  height: 128px;
+  padding: 5px 5px 20px;
+  rotate: -3deg;
+  background: #d7c89f;
+  border: 1px solid #a39470;
+  box-shadow: 2px 3px 5px #4d39294d;
+  color: #46341f;
+}
+.document-avatar > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+.document-avatar .document-avatar-preview {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: calc(100% - 10px);
+  height: calc(100% - 25px);
+}
+.document-avatar > span {
+  display: block;
+  padding-top: 4px;
+  text-align: center;
+  font:
+    11px/1.2 'Courier New',
+    monospace;
+}
+.document-avatar > small {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: -5px;
+  right: -5px;
+  font: 12px/1.4 'Courier New';
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.document-rank {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 104px;
+}
+.document-rank.rank-photograph--marshal {
+  width: 90px;
+  right: 0;
+  top: 10px;
+}
+.profile-document-facts {
+  margin: 0 98px 0 129px;
+}
+.profile-document-facts > div {
+  margin: 0 0 17px;
+}
+.profile-document-facts dt {
+  font:
+    12px/1.35 'Courier New',
+    monospace;
+  color: #8a6c42;
+}
+.profile-document-facts dd {
+  font:
+    17px/1.4 'Special Elite',
+    'Courier New',
+    monospace;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.profile-document-facts .document-user-id dd {
+  font: 12px/1.5 'Courier New';
+}
+.document-name-input {
+  width: 100%;
+  padding: 2px 0 5px;
+  border: 0;
+  border-bottom: 1px dashed #82633a;
+  border-radius: 0;
+  background: transparent;
+  color: #503420;
+  font:
+    17px/1.4 'Special Elite',
+    'Courier New',
+    monospace;
+}
+.document-upload-note {
+  font: 13px/1.5 'Courier New';
+  color: #7d5d30;
+  padding: 8px 0;
+}
+.document-password-section {
+  border-top: 1px dashed #9d8254;
+  padding-top: 19px;
+  margin-top: 20px;
+}
+.document-password-toggle {
+  padding: 4px 0;
+  background: transparent;
+  color: #8a3226;
+  font:
+    18px 'Special Elite',
+    'Courier New';
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.profile-document-footer,
+.all-cases-footer {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  bottom: 23px;
+  height: 46px;
+}
+.document-close-stamp {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  padding: 8px 15px 6px;
+  border: 3px double #8b3a2b;
+  rotate: 2deg;
+  color: #823627;
+  background: #cdb68033;
+  font:
+    16px/1.2 'Special Elite',
+    'Courier New';
+}
+.document-close-stamp:hover {
+  background: #c2a66d55;
+}
+.document-save-stamp {
+  position: absolute;
+  right: 0;
+  top: 0;
+  rotate: -2deg;
+  border: 3px double #7e3023;
+}
+.all-cases-document {
+  width: min(1040px, 95vw);
+  height: min(740px, 89dvh);
+}
+.all-cases-board {
+  position: absolute;
+  top: 128px;
+  bottom: 90px;
+  left: 27px;
+  right: 27px;
+}
+.all-cases-board .metal-case {
+  width: 28%;
+  height: 39%;
+  max-height: none;
+  bottom: auto;
+}
+.all-cases-board .metal-case--0 {
+  left: 3%;
+  top: 4%;
+  rotate: -4deg;
+}
+.all-cases-board .metal-case--1 {
+  left: 36%;
+  top: 2%;
+  rotate: 2deg;
+}
+.all-cases-board .metal-case--2 {
+  left: 69%;
+  top: 5%;
+  rotate: -2deg;
+}
+.all-cases-board .metal-case--3 {
+  left: 4%;
+  top: 55%;
+  rotate: 3deg;
+}
+.all-cases-board .metal-case--4 {
+  left: 36%;
+  top: 54%;
+  rotate: -3deg;
+}
+.all-cases-board .metal-case--5 {
+  left: 68%;
+  top: 56%;
+  rotate: 2deg;
+}
+.all-cases-board .metal-case-number {
+  left: 10px;
+  right: 10px;
+  top: 9px;
+  font-size: 11px;
+}
+.all-cases-board .metal-case-thumbnail {
+  top: 32px;
+  left: 9px;
+  bottom: 15px;
+  width: 29%;
+}
+.all-cases-board .metal-case strong {
+  top: 39px;
+  left: 42%;
+  right: 10px;
+  -webkit-line-clamp: 2;
+  font-size: 18px;
+}
+.all-cases-board .metal-case-stamp {
+  font-size: 12px;
+  right: 12px;
+  bottom: 13px;
+}
+.all-cases-empty {
+  position: absolute;
+  top: 35%;
+  width: 100%;
+  text-align: center;
+  font: 20px 'Special Elite';
+  color: #735333;
+}
+.all-cases-pagination {
+  position: absolute;
+  right: 0;
+  top: 8px;
+  font: 15px 'Courier New';
+  color: #65482c;
+}
+.all-cases-pagination button {
+  padding: 5px 7px;
+  background: transparent;
+  color: #7b3024;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (min-width: 651px) and (max-height: 700px) {
+  .safe-summary {
+    top: 33px;
+    height: 45%;
+    left: 14px;
+    right: 14px;
+  }
+  .safe-summary .metal-id-photo {
+    width: 58px;
+    height: 78px;
+    top: 12px;
+    left: 9px;
+  }
+  .safe-summary-details {
+    left: 79px;
+    right: 64px;
+    top: 11px;
+  }
+  .safe-summary-name {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+  .safe-summary-rank {
+    margin-top: 7px;
+    font-size: 20px;
+  }
+  .safe-summary-points {
+    font-size: 22px;
+  }
+  .summary-rank {
+    top: 5px;
+    right: -7px;
+    width: 76px;
+  }
+  .summary-progress-note {
+    left: 11px;
+    right: 11px;
+    bottom: 22px;
+    font-size: 12px;
+  }
+  .summary-progress {
+    left: 11px;
+    right: 11px;
+    bottom: 10px;
+  }
+  .metal-case-thumbnail {
+    top: 22px;
+    padding: 2px 2px 4px;
+  }
+  .metal-case strong {
+    left: 38%;
+    top: 22px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 650px) {
+  .safe-summary {
+    top: 45px;
+    height: 43%;
+    left: 14px;
+    right: 14px;
+  }
+  .safe-summary .metal-id-photo {
+    top: 14px;
+    left: 9px;
+    width: 61px;
+    height: 82px;
+  }
+  .safe-summary-details {
+    left: 81px;
+    right: 55px;
+    top: 13px;
+  }
+  .safe-summary-name {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+  .safe-summary-rank {
+    font-size: 19px;
+    line-height: 1.15;
+    margin-top: 8px;
+  }
+  .safe-summary-points {
+    font-size: 23px;
+  }
+  .summary-rank {
+    top: 5px;
+    right: -10px;
+    width: 75px;
+  }
+  .summary-progress-note {
+    left: 10px;
+    right: 10px;
+    bottom: 24px;
+    font-size: 12px;
+  }
+  .summary-progress {
+    left: 10px;
+    right: 10px;
+    bottom: 11px;
+  }
+  .safe-summary .metal-id-photo > span {
+    font-size: 9px;
+  }
+  .profile-document,
+  .all-cases-document {
+    padding: 24px 22px;
+  }
+  .profile-document h2,
+  .all-cases-document h2 {
+    font-size: 24px;
+    margin-top: 11px;
+  }
+  .profile-document > p,
+  .all-cases-document > p {
+    font-size: 13px;
+  }
+  .profile-document-body {
+    left: 22px;
+    right: 18px;
+    top: 118px;
+    bottom: 80px;
+  }
+  .document-avatar {
+    top: 7px;
+    width: 83px;
+    height: 112px;
+  }
+  .document-avatar > small {
+    font-size: 11px;
+  }
+  .document-rank {
+    top: 0;
+    right: 0;
+    width: 92px;
+  }
+  .profile-document-facts {
+    margin: 0;
+    padding-top: 156px;
+  }
+  .profile-document-facts dd {
+    font-size: 17px;
+  }
+  .profile-document-facts dt {
+    font-size: 12px;
+  }
+  .profile-document-footer,
+  .all-cases-footer {
+    left: 23px;
+    right: 23px;
+    bottom: 20px;
+  }
+  .all-cases-board {
+    top: 137px;
+    left: 15px;
+    right: 15px;
+    bottom: 88px;
+  }
+  .all-cases-board .metal-case {
+    width: 84%;
+    height: 40%;
+  }
+  .all-cases-board .metal-case--0 {
+    left: 8%;
+    top: 4%;
+  }
+  .all-cases-board .metal-case--1 {
+    left: 8%;
+    top: 55%;
+  }
+  .all-cases-board .metal-case strong {
+    font-size: 18px;
+  }
+  .all-cases-pagination {
+    font-size: 12px;
+    top: 9px;
+  }
+  .all-cases-pagination button {
+    padding: 5px 4px;
+  }
+  .all-cases-footer .document-close-stamp {
+    padding: 7px 10px 5px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 650px) and (max-height: 680px) {
+  .safe-summary {
+    top: 29px;
+    height: 46%;
+    left: 12px;
+    right: 12px;
+  }
+  .safe-summary .metal-id-photo {
+    top: 12px;
+    left: 8px;
+    width: 48px;
+    height: 65px;
+    padding: 3px 3px 13px;
+  }
+  .safe-summary .metal-id-photo > span {
+    padding-top: 1px;
+    font-size: 8px;
+  }
+  .safe-summary-details {
+    left: 68px;
+    right: 41px;
+    top: 9px;
+  }
+  .safe-summary-name {
+    font-size: 13.5px;
+    line-height: 1.2;
+  }
+  .safe-summary-rank {
+    font-size: 16px;
+    line-height: 1.15;
+    margin-top: 3px;
+  }
+  .safe-summary-points {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+  .summary-rank {
+    top: 5px;
+    right: -9px;
+    width: 62px;
+  }
+  .summary-progress-note {
+    left: 8px;
+    right: 8px;
+    bottom: 21px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .summary-progress {
+    left: 8px;
+    right: 8px;
+    bottom: 9px;
+    height: 5px;
+  }
+  .metal-case-thumbnail {
+    top: 20px;
+    bottom: 4px;
+    padding: 2px;
+  }
+  .metal-case strong {
+    top: 20px;
+    font-size: 11px;
+  }
+  .all-cases-board {
+    top: 129px;
+    bottom: 79px;
+  }
+  .all-cases-board .metal-case strong {
+    font-size: 15px;
+    -webkit-line-clamp: 2;
+  }
+  .all-cases-board .metal-case-stamp {
+    font-size: 10px;
+    bottom: 9px;
+  }
+  .all-cases-board .metal-case-thumbnail {
+    top: 29px;
+    bottom: 9px;
+  }
+  .profile-document h2,
+  .all-cases-document h2 {
+    font-size: 22px;
+  }
+  .metal-password-paper {
+    padding-block: 23px;
+  }
+  .metal-password-paper h2 {
+    margin-block: 10px 6px;
+  }
+  .profile-password-form .metal-paper-field {
+    margin-top: 13px;
+  }
+}
+.safe-summary-rank {
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+@media (max-width: 650px) and (max-height: 680px) {
+  .all-cases-board {
+    top: 170px;
+  }
+  .all-cases-board .metal-case strong {
+    top: 34px;
+    font-size: 14px;
+  }
+}

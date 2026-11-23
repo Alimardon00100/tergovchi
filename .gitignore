@@ -1,0 +1,16 @@
+node_modules/
+.cache/
+.tools/
+.local/
+.turbo/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+playwright-report/
+test-results/
+*.dump
+apps/web/public/assets/backgrounds/*
+!apps/web/public/assets/backgrounds/.gitkeep

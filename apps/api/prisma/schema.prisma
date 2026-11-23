@@ -1,0 +1,414 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  HEAD
+  PROSECUTOR
+  AUDITOR
+  USER
+  ADMIN
+}
+
+enum RankName {
+  LIEUTENANT
+  SENIOR_LIEUTENANT
+  CAPTAIN
+  MAJOR
+  LIEUTENANT_COLONEL
+  COLONEL
+  MAJOR_GENERAL
+  LIEUTENANT_GENERAL
+  COLONEL_GENERAL
+  MARSHAL
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum CasePublication {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ProgressStatus {
+  IN_PROGRESS
+  CLOSED
+}
+
+enum EvidenceType {
+  TEXT
+  IMAGE
+  DOCUMENT
+}
+
+enum PointTransactionType {
+  CASE_OPEN
+  ADMIN_ADJUSTMENT
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique @db.VarChar(254)
+  displayName  String    @db.VarChar(80)
+  passwordHash String    @db.VarChar(255)
+  role         UserRole  @default(USER)
+  points       Int       @default(0)
+  rankName     RankName  @default(LIEUTENANT)
+  avatarKey    String?   @db.VarChar(512)
+  bannedAt     DateTime? @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+
+  departmentId     String             @default("00000000-0000-4000-8000-000000000001") @db.Uuid
+  department       Department         @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  legalAssignments CaseFile[]         @relation("CaseAssignee")
+  legalCreated     CaseFile[]         @relation("CaseCreator")
+  legalDocuments   CaseDocument[]
+  qualifications   Qualification[]
+  legalLocks       CaseLock[]
+  rank             RankConfig         @relation(fields: [rankName], references: [name], onDelete: Restrict)
+  progress         UserCaseProgress[]
+  transactions     PointTransaction[]
+  refreshTokens    RefreshToken[]
+  auditLogs        AuditLog[]
+
+  @@index([points(sort: Desc), createdAt, id])
+}
+
+model RankConfig {
+  name         RankName @id
+  title        String   @db.VarChar(80)
+  minPoints    Int      @unique
+  displayOrder Int      @unique
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+  users        User[]
+}
+
+model Case {
+  id            String             @id @default(uuid()) @db.Uuid
+  slug          String             @unique @db.VarChar(100)
+  title         String             @db.VarChar(160)
+  summary       String             @db.VarChar(2000)
+  description   String             @db.Text
+  difficulty    Difficulty
+  basePoints    Int
+  customPoints  Int?
+  publication   CasePublication    @default(DRAFT)
+  coverAssetKey String?            @db.VarChar(512)
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime           @updatedAt @db.Timestamptz(3)
+  evidence      CaseEvidence[]
+  progress      UserCaseProgress[]
+  transactions  PointTransaction[]
+
+  @@index([publication, createdAt(sort: Desc), id])
+  @@index([publication, difficulty, createdAt(sort: Desc), id])
+}
+
+model CaseEvidence {
+  id           String       @id @default(uuid()) @db.Uuid
+  caseId       String       @db.Uuid
+  title        String       @db.VarChar(160)
+  type         EvidenceType
+  content      String?      @db.Text
+  assetKey     String?      @db.VarChar(512)
+  displayOrder Int
+  case         Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, displayOrder])
+}
+
+model UserCaseProgress {
+  id            String         @id @default(uuid()) @db.Uuid
+  userId        String         @db.Uuid
+  caseId        String         @db.Uuid
+  status        ProgressStatus @default(IN_PROGRESS)
+  awardedPoints Int
+  openedAt      DateTime       @default(now()) @db.Timestamptz(3)
+  closedAt      DateTime?      @db.Timestamptz(3)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  case          Case           @relation(fields: [caseId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, caseId])
+  @@index([userId, status, openedAt(sort: Desc), id])
+}
+
+model PointTransaction {
+  id             String               @id @default(uuid()) @db.Uuid
+  userId         String               @db.Uuid
+  caseId         String?              @db.Uuid
+  type           PointTransactionType
+  amount         Int
+  balanceAfter   Int
+  idempotencyKey String               @db.VarChar(128)
+  reason         String               @db.VarChar(1000)
+  requestId      String               @db.Uuid
+  createdAt      DateTime             @default(now()) @db.Timestamptz(3)
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  case           Case?                @relation(fields: [caseId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, idempotencyKey])
+  @@unique([userId, caseId, type])
+  @@index([userId, createdAt(sort: Desc), id])
+}
+
+model RefreshToken {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @db.Uuid
+  tokenHash    String        @unique @db.Char(64)
+  familyId     String        @db.Uuid
+  expiresAt    DateTime      @db.Timestamptz(3)
+  revokedAt    DateTime?     @db.Timestamptz(3)
+  replacedById String?       @unique @db.Uuid
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedBy   RefreshToken? @relation("Rotation", fields: [replacedById], references: [id], onDelete: SetNull)
+  replaces     RefreshToken? @relation("Rotation")
+
+  @@index([familyId, revokedAt])
+  @@index([expiresAt])
+  @@index([userId, revokedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  action     String   @db.VarChar(80)
+  targetType String   @db.VarChar(80)
+  targetId   String?  @db.VarChar(128)
+  requestId  String   @db.Uuid
+  ip         String?  @db.VarChar(45)
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc), id])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@index([requestId])
+}
+
+enum CaseFileStatus {
+  NEW
+  ASSIGNED
+  IN_INVESTIGATION
+  QUALIFICATION_SUBMITTED
+  SCORED
+  CLOSED
+  SUSPENDED
+}
+
+enum CasePersonRole {
+  SUSPECT
+  WITNESS
+  VICTIM
+  OTHER
+}
+
+enum QualificationStatus {
+  DRAFT
+  SUBMITTED
+  SCORED
+}
+
+enum QualificationElement {
+  SUBJECT
+  PARTICIPATION
+  OBJECT
+  OBJECTIVE
+  SUBJECTIVE
+}
+
+enum CaseDocumentType {
+  EXPERT_REPORT
+  WITNESS_TESTIMONY
+  SUSPECT_TESTIMONY
+  PROTOCOL
+  DECISION
+  EVIDENCE_PHOTO
+}
+
+model Department {
+  id    String     @id @default(uuid()) @db.Uuid
+  code  String     @unique @db.VarChar(40)
+  name  String     @db.VarChar(160)
+  users User[]
+  cases CaseFile[]
+}
+
+model CaseFile {
+  id                  String          @id @default(uuid()) @db.Uuid
+  caseNumber          String          @unique @db.VarChar(30)
+  title               String          @db.VarChar(160)
+  summary             String          @db.VarChar(2000)
+  initialFacts        String          @db.Text
+  status              CaseFileStatus  @default(NEW)
+  openedAt            DateTime        @default(now()) @db.Timestamptz(3)
+  deadlineAt          DateTime        @db.Timestamptz(3)
+  closedAt            DateTime?       @db.Timestamptz(3)
+  assignedTergovchiId String?         @db.Uuid
+  departmentId        String          @db.Uuid
+  createdById         String          @db.Uuid
+  jkArticles          String[]
+  referenceRevision   Int             @default(0)
+  suspendedFrom       CaseFileStatus?
+  suspendedReason     String?         @db.VarChar(1000)
+  createdAt           DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime        @updatedAt @db.Timestamptz(3)
+  assignee            User?           @relation("CaseAssignee", fields: [assignedTergovchiId], references: [id], onDelete: Restrict)
+  creator             User            @relation("CaseCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  department          Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  episodes            Episode[]
+  persons             CasePerson[]
+  documents           CaseDocument[]
+  qualifications      Qualification[]
+  scores              CaseScore[]
+  lock                CaseLock?
+
+  @@index([status, deadlineAt, id])
+  @@index([departmentId, status, id])
+  @@index([assignedTergovchiId, status, id])
+  @@index([jkArticles], type: Gin)
+}
+
+model Episode {
+  id            String                @id @default(uuid()) @db.Uuid
+  caseId        String                @db.Uuid
+  episodeNumber Int
+  description   String                @db.Text
+  jkArticle     String                @db.VarChar(20)
+  location      String                @db.VarChar(200)
+  dateTime      DateTime              @db.Timestamptz(3)
+  weight        Decimal               @default(1) @db.Decimal(8, 3)
+  case          CaseFile              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  answers       QualificationAnswer[]
+  references    ReferenceAnswer[]
+
+  @@unique([caseId, id])
+  @@unique([caseId, episodeNumber])
+}
+
+model Person {
+  id               String       @id @default(uuid()) @db.Uuid
+  fullName         String       @db.VarChar(160)
+  birthDate        DateTime     @db.Date
+  gender           String       @db.VarChar(10)
+  addressEncrypted String       @db.Text
+  pinflEncrypted   String?      @db.Text
+  pinflLast4       String?      @db.Char(4)
+  photoUrl         String?      @db.VarChar(200)
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+  cases            CasePerson[]
+}
+
+model CasePerson {
+  caseId   String         @db.Uuid
+  personId String         @db.Uuid
+  role     CasePersonRole
+  case     CaseFile       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  person   Person         @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@id([caseId, personId])
+  @@index([personId])
+}
+
+model CaseDocument {
+  id         String           @id @default(uuid()) @db.Uuid
+  caseId     String           @db.Uuid
+  type       CaseDocumentType
+  title      String           @db.VarChar(160)
+  storageKey String           @unique @db.VarChar(180)
+  mime       String           @db.VarChar(80)
+  sha256     String           @db.Char(64)
+  bytes      Int
+  authorId   String           @db.Uuid
+  isEvidence Boolean          @default(false)
+  createdAt  DateTime         @default(now()) @db.Timestamptz(3)
+  case       CaseFile         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  author     User             @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([caseId, type, createdAt, id])
+}
+
+model Qualification {
+  id          String                @id @default(uuid()) @db.Uuid
+  caseId      String                @db.Uuid
+  createdBy   String                @db.Uuid
+  status      QualificationStatus   @default(DRAFT)
+  submittedAt DateTime?             @db.Timestamptz(3)
+  createdAt   DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime              @updatedAt @db.Timestamptz(3)
+  case        CaseFile              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  author      User                  @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  answers     QualificationAnswer[]
+  score       CaseScore?
+
+  @@unique([caseId, id])
+  @@index([caseId, createdBy, status])
+}
+
+model QualificationAnswer {
+  id              String               @id @default(uuid()) @db.Uuid
+  caseId          String               @db.Uuid
+  qualificationId String               @db.Uuid
+  episodeId       String               @db.Uuid
+  elementType     QualificationElement
+  payload         Json
+  version         Int                  @default(1)
+  updatedAt       DateTime             @updatedAt @db.Timestamptz(3)
+  qualification   Qualification        @relation(fields: [caseId, qualificationId], references: [caseId, id], onDelete: Cascade)
+  episode         Episode              @relation(fields: [caseId, episodeId], references: [caseId, id], onDelete: Restrict)
+
+  @@unique([qualificationId, episodeId, elementType])
+}
+
+model ReferenceAnswer {
+  id          String               @id @default(uuid()) @db.Uuid
+  caseId      String               @db.Uuid
+  episodeId   String               @db.Uuid
+  elementType QualificationElement
+  payload     Json
+  weight      Decimal              @db.Decimal(5, 2)
+  updatedAt   DateTime             @updatedAt @db.Timestamptz(3)
+  episode     Episode              @relation(fields: [caseId, episodeId], references: [caseId, id], onDelete: Cascade)
+
+  @@unique([caseId, episodeId, elementType])
+}
+
+model CaseScore {
+  id                String        @id @default(uuid()) @db.Uuid
+  caseId            String        @db.Uuid
+  qualificationId   String        @unique @db.Uuid
+  attemptNumber     Int
+  totalScore        Decimal       @db.Decimal(5, 2)
+  breakdown         Json
+  referenceRevision Int
+  referenceSnapshot Json
+  scoredAt          DateTime      @default(now()) @db.Timestamptz(3)
+  case              CaseFile      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  qualification     Qualification @relation(fields: [caseId, qualificationId], references: [caseId, id], onDelete: Cascade)
+
+  @@unique([caseId, attemptNumber])
+  @@unique([caseId, qualificationId])
+  @@index([caseId, totalScore(sort: Desc), attemptNumber])
+}
+
+model CaseLock {
+  caseId    String   @id @db.Uuid
+  lockedBy  String   @db.Uuid
+  lockedAt  DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  case      CaseFile @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  owner     User     @relation(fields: [lockedBy], references: [id], onDelete: Restrict)
+
+  @@index([expiresAt])
+}

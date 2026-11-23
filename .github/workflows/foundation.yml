@@ -1,0 +1,48 @@
+name: Poydevor sifati
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LOCAL_SERVICES: external
+      DATABASE_URL: postgresql://detective:ci_test_only@127.0.0.1:5432/detective_test?schema=public
+      TEST_DATABASE_URL: postgresql://detective:ci_test_only@127.0.0.1:5432/detective_test?schema=public
+      REDIS_URL: redis://127.0.0.1:6379
+    steps:
+      - uses: actions/checkout@v4
+      - name: PostgreSQL va Redis xizmatlarini tayyorlash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 redis-server
+          sudo systemctl start postgresql@16-main redis-server
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE ROLE detective LOGIN PASSWORD 'ci_test_only';" -c "CREATE DATABASE detective_test OWNER detective;"
+          pg_isready -h 127.0.0.1 -p 5432
+          redis-cli ping
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm env:init
+      - run: pnpm services:check
+      - run: pnpm db:generate
+      - run: pnpm db:validate
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm test:db
+      - run: pnpm test:http
+      - run: pnpm build
+      - run: pnpm format:check
+      - run: pnpm audit
