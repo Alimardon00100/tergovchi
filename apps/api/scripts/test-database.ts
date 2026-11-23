@@ -34,11 +34,13 @@ async function main() {
       [
         join(dirname(require.resolve('vitest/package.json')), 'vitest.mjs'),
         'run',
-        process.argv.includes('--case-module')
-          ? 'tests/case-module.integration.test.ts'
-          : process.argv.includes('--http')
-            ? 'tests/http.integration.test.ts'
-            : 'tests/database.integration.test.ts',
+        process.argv.includes('--case-opening-character')
+          ? 'tests/character/case-opening.integration.test.ts'
+          : process.argv.includes('--case-module')
+            ? 'tests/case-module.integration.test.ts'
+            : process.argv.includes('--http')
+              ? 'tests/http.integration.test.ts'
+              : 'tests/database.integration.test.ts',
         '--testTimeout=20000',
         '--hookTimeout=30000',
       ],

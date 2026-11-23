@@ -33,7 +33,8 @@
     "test:case-module:coverage": "pnpm --filter @detective/api exec vitest run tests/case-scoring.test.ts --coverage --coverage.include=src/case-module/scoring.ts --coverage.reporter=text --coverage.reporter=json-summary",
     "openapi:case-module": "node scripts/generate-case-openapi.mjs",
     "backup:case-module": "node --env-file=.env apps/api/dist/scripts/backup.js",
-    "test:case-module:exports": "node tests/case-module.exports.mjs"
+    "test:case-module:exports": "node tests/case-module.exports.mjs",
+    "test:case-opening:character": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-character"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
