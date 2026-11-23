@@ -33,13 +33,11 @@ export class CaseOpeningTelemetry implements NestInterceptor {
       else if (failed) openingLogger.warn(fields);
       else openingLogger.info(fields);
     };
-    return next
-      .handle()
-      .pipe(
-        tap({
-          next: (value) => record(false, value),
-          error: (error: unknown) => record(true, error),
-        }),
-      );
+    return next.handle().pipe(
+      tap({
+        next: (value) => record(false, value),
+        error: (error: unknown) => record(true, error),
+      }),
+    );
   }
 }

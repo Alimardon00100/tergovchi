@@ -30,7 +30,9 @@ const CaseDashboard = lazy(() =>
   import('../features/case-module/CaseDashboard').then((m) => ({ default: m.CaseDashboard })),
 );
 const CaseWorkspacePage = lazy(() =>
-  import('../features/case-module/CaseWorkspace').then((m) => ({ default: m.CaseWorkspacePage })),
+  import('../features/case-module/CaseWorkspaceEntry').then((m) => ({
+    default: m.CaseWorkspaceEntry,
+  })),
 );
 const CaseAdmin = lazy(() =>
   import('../features/case-module/CaseAdmin').then((m) => ({ default: m.CaseAdmin })),
@@ -92,6 +94,10 @@ export function App() {
                   <Route path="admin" element={<CaseAdmin />} />
                   <Route path="audit" element={<CaseAudit />} />
                   <Route path=":id" element={<CaseWorkspacePage />} />
+                  <Route path=":id/workspace" element={<CaseWorkspacePage />} />
+                </Route>
+                <Route path="/cases/:id/workspace" element={<CaseShell />}>
+                  <Route index element={<CaseWorkspacePage />} />
                 </Route>
                 <Route path="/" element={<Navigate to="/board" replace />} />
                 <Route

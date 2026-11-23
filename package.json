@@ -37,7 +37,8 @@
     "test:case-opening:character": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-character",
     "test:case-opening:migration": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-migration",
     "backfill:case-opening": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/backfill-case-opening.ts",
-    "test:case-opening:v2": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-v2"
+    "test:case-opening:v2": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-v2",
+    "test:case-opening:browser": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-browser"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

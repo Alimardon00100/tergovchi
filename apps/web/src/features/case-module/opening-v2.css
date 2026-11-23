@@ -1,0 +1,26 @@
+.opening-skeleton > div {
+  height: 1.25rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  background: #766b5c33;
+}
+.opening-skeleton > div:nth-child(3) {
+  width: 70%;
+}
+.opening-skeleton > div:nth-child(4) {
+  width: 85%;
+}
+.opening-form-error {
+  color: #9b1c1c;
+  font-weight: 700;
+}
+.theme-dark .opening-form-error {
+  color: #ffb4ab;
+}
+.case-module :focus-visible {
+  outline: 3px solid #875422;
+  outline-offset: 4px;
+}
+.theme-dark :focus-visible {
+  outline-color: #e5b477;
+}
