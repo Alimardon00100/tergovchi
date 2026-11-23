@@ -306,6 +306,8 @@ model Person {
   pinflEncrypted   String?      @db.Text
   pinflLast4       String?      @db.Char(4)
   photoUrl         String?      @db.VarChar(200)
+  contactEncrypted String?      @db.Text
+  noteEncrypted    String?      @db.Text
   createdAt        DateTime     @default(now()) @db.Timestamptz(3)
   cases            CasePerson[]
 }
