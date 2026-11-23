@@ -24,7 +24,7 @@ async function main() {
     DATABASE_URL: url.toString(),
     TEST_DATABASE_URL: url.toString(),
   };
-  if (process.argv.includes('--case-opening-browser'))
+  if (process.argv.some((arg) => arg.startsWith('--case-opening-browser')))
     env['PLAYWRIGHT_BROWSERS_PATH'] =
       process.env['PLAYWRIGHT_BROWSERS_PATH'] ?? resolve('../../.cache/playwright');
   const prisma = new PrismaClient({ datasources: { db: { url: url.toString() } } });
@@ -41,22 +41,28 @@ async function main() {
       [
         join(dirname(require.resolve('vitest/package.json')), 'vitest.mjs'),
         'run',
-        process.argv.includes('--case-opening-browser')
-          ? 'tests/case-opening.browser.integration.test.ts'
-          : process.argv.includes('--case-opening-v2')
-            ? 'tests/case-opening-v2.integration.test.ts'
-            : process.argv.includes('--case-opening-migration')
-              ? 'tests/case-opening-migration.integration.test.ts'
-              : process.argv.includes('--case-opening-character')
-                ? 'tests/character/case-opening.integration.test.ts'
-                : process.argv.includes('--case-module')
-                  ? 'tests/case-module.integration.test.ts'
-                  : process.argv.includes('--http')
-                    ? 'tests/http.integration.test.ts'
-                    : 'tests/database.integration.test.ts',
+        process.argv.includes('--case-opening-browser-legacy')
+          ? 'tests/case-opening-legacy.browser.integration.test.ts'
+          : process.argv.includes('--case-opening-performance')
+            ? 'tests/case-opening-performance.integration.test.ts'
+            : process.argv.includes('--case-opening-browser')
+              ? 'tests/case-opening.browser.integration.test.ts'
+              : process.argv.includes('--case-opening-v2')
+                ? 'tests/case-opening-v2.integration.test.ts'
+                : process.argv.includes('--case-opening-migration')
+                  ? 'tests/case-opening-migration.integration.test.ts'
+                  : process.argv.includes('--case-opening-character')
+                    ? 'tests/character/case-opening.integration.test.ts'
+                    : process.argv.includes('--case-module')
+                      ? 'tests/case-module.integration.test.ts'
+                      : process.argv.includes('--http')
+                        ? 'tests/http.integration.test.ts'
+                        : 'tests/database.integration.test.ts',
         '--testTimeout=20000',
         '--hookTimeout=30000',
-        ...(process.argv.includes('--case-opening-browser') ? ['--bail=1'] : []),
+        ...(process.argv.some((arg) => arg.startsWith('--case-opening-browser'))
+          ? ['--bail=1']
+          : []),
       ],
       { env, stdio: 'inherit' },
     );
