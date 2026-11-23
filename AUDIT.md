@@ -152,3 +152,15 @@ V1 character testlarini yangi, keyin o‘zgartirilmaydigan faylda yozish. So‘n
 default-off runtime flag, additive migratsiya, v2 API/UI va zarur regression/E2E
 tekshiruvlari. DB ishlari faqat zaxira va alohida test bazasidagi rollback dalili
 bilan; production rollout va bir haftalik kuzatuv mahalliy QA bilan almashtirilmaydi.
+
+## Yakuniy holat — 2026-11-23
+
+Faza 0–7 implementatsiya va mahalliy QA bilan bajarildi. Rollout tayyorgarligi:
+backup vositasi, 7 kunlik log metrikalari, guard xatolari logi, qoralamaning
+v2 → v1 rollback himoyasi va CI tayyor. Haqiqiy staging/production rollout
+va bir haftalik kuzatuv bajarilmagan; default flag false qoladi.
+
+Yuqoridagi jadval discovery paytidagi baseline bo‘lib saqlangan. Topilmalar
+bo‘yicha amalga oshirilgan o‘zgarishlar, testlarning yakuniy natijasi va
+tasdiqlangan istisnolar [FIX_NOTE.md](FIX_NOTE.md)da. Yangi nullable ustunlar
+faqat test sxemalarida qo‘llandi; asosiy bazadan tekshirilgan pg_dump olindi.
