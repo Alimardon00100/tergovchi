@@ -6,12 +6,13 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { CASE_STATUSES, caseListSchema, casePreviewSchema } from '@detective/shared';
 import type { CasePreview } from '@detective/shared';
-import { api } from '../../shared/api/client';
+import { api, ApiError } from '../../shared/api/client';
 import { PaperSelect } from '../../shared/ui/PaperSelect';
 import { useQuietMotion } from '../../shared/lib/motion';
 import { useCaseUi, CasePending, CasePager, CaseField, Deadline } from './CaseShell';
 export function CaseDashboard() {
-  const { t, meta } = useCaseUi();
+  const { t, meta, v2 } = useCaseUi();
+  const version = v2 ? 'v2' : 'v1';
   const navigate = useNavigate(),
     client = useQueryClient(),
     quiet = useQuietMotion();
@@ -21,16 +22,20 @@ export function CaseDashboard() {
     [page, setPage] = useState(1),
     [selected, setSelected] = useState<string | null>(null);
   const cases = useQuery({
-    queryKey: ['legal', 'list', params, page],
-    queryFn: () => api(`/v1/cases?page=${page}&${params}`, caseListSchema),
+    queryKey: ['legal', 'list', params, page, version],
+    queryFn: () => api(`/${version}/cases?page=${page}&${params}`, caseListSchema),
   });
   const take = useMutation({
-    mutationFn: (id: string) => api(`/v1/cases/${id}/lock`, casePreviewSchema, { method: 'POST' }),
+    mutationFn: (id: string) =>
+      api(`/${version}/cases/${id}/lock`, casePreviewSchema, { method: 'POST' }),
     onSuccess: async (result) => {
       await client.invalidateQueries({ queryKey: ['legal'] });
-      navigate('/case-files/' + result.id);
+      navigate(v2 ? `/cases/${result.id}/workspace` : '/case-files/' + result.id);
     },
-    onError: () => toast.error(t('error')),
+    onError: (error) =>
+      toast.error(
+        t(v2 && error instanceof ApiError && error.status === 409 ? 'lockedElsewhere' : 'error'),
+      ),
   });
   return (
     <>
@@ -191,10 +196,10 @@ function CasePreviewDialog({
   onTake: (id: string) => void;
   busy: boolean;
 }) {
-  const { t, theme, locale, meta } = useCaseUi();
+  const { t, theme, locale, meta, v2 } = useCaseUi();
   const query = useQuery({
-    queryKey: ['legal', 'preview', id],
-    queryFn: () => api(`/v1/cases/${id}`, casePreviewSchema),
+    queryKey: ['legal', 'preview', id, v2],
+    queryFn: () => api(`/${v2 ? 'v2' : 'v1'}/cases/${id}`, casePreviewSchema),
   });
   return (
     <Dialog.Root
@@ -226,6 +231,16 @@ function CasePreviewDialog({
               <h3>{t('initial')}</h3>
               <p>{query.data.initialFacts}</p>
               <Deadline date={query.data.deadlineAt} />
+              {v2 && (
+                <p>
+                  {t('opened')}:{' '}
+                  <time dateTime={query.data.openedAt}>
+                    {new Date(query.data.openedAt).toLocaleString(
+                      locale === 'ru' ? 'ru-RU' : 'uz-UZ',
+                    )}
+                  </time>
+                </p>
+              )}
               {meta.user.role === 'USER' && (
                 <button
                   className="case-button case-stamp-button"

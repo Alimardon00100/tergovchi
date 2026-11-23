@@ -17,6 +17,8 @@ import { HTTP_OPTIONS, parseInput } from '../http/controllers';
 import type { HttpOptions } from '../http/controllers';
 import { CaseService, assertRead, audit, lockedFile } from './case.service';
 import type { CaseActor } from './case.service';
+import { assertDocumentOwner } from './opening-access';
+import { CASE_OPENING_LIMITS } from './flags';
 @Injectable()
 export class CaseDocuments {
   readonly root: string;
@@ -29,14 +31,15 @@ export class CaseDocuments {
         join(dirname(options.mediaDirectory ?? resolve('.local/uploads')), 'case-files'),
     );
   }
-  async list(actor: CaseActor, id: string) {
+  async list(actor: CaseActor, id: string, version: 'v1' | 'v2' = 'v1') {
     const file = await this.cases.file(id);
     assertRead(actor, file);
+    if (version === 'v2') assertDocumentOwner(actor, file);
     const rows = await this.cases.db.caseDocument.findMany({
       where: { caseId: id },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
-    const expires = Date.now() + 900000;
+    const expires = Date.now() + CASE_OPENING_LIMITS.signedUrlMs;
     await audit(this.cases.db, actor, 'DOCUMENTS_READ', id);
     return rows.map((row) => ({
       id: row.id,
@@ -47,7 +50,7 @@ export class CaseDocuments {
       isEvidence: row.isEvidence,
       createdAt: row.createdAt.toISOString(),
       expiresAt: new Date(expires).toISOString(),
-      signedUrl: `/api/v1/cases/${id}/documents/${row.id}/file?token=${this.cases.crypto.sign({ documentId: row.id, caseId: id, userId: actor.id, sha256: row.sha256, expires })}`,
+      signedUrl: `/api/${version}/cases/${id}/documents/${row.id}/file?token=${this.cases.crypto.sign({ documentId: row.id, caseId: id, userId: actor.id, sha256: row.sha256, expires, ...(version === 'v2' ? { version } : {}) })}`,
     }));
   }
   path(key: string) {
@@ -59,7 +62,13 @@ export class CaseDocuments {
       throw new ForbiddenException('Hujjat manzili yaroqsiz.');
     return path;
   }
-  async file(actor: CaseActor, id: string, documentId: string, token: string) {
+  async file(
+    actor: CaseActor,
+    id: string,
+    documentId: string,
+    token: string,
+    version: 'v1' | 'v2' = 'v1',
+  ) {
     await this.cases.expire(id);
     const row = await this.cases.db.caseDocument.findFirst({
       where: { id: documentId, caseId: id },
@@ -70,6 +79,7 @@ export class CaseDocuments {
       caseId: id,
       userId: actor.id,
       sha256: row.sha256,
+      ...(version === 'v2' ? { version } : {}),
     });
     const data = await readFile(this.path(row.storageKey)).catch(() => {
       throw new NotFoundException('Hujjat fayli topilmadi.');
@@ -79,6 +89,7 @@ export class CaseDocuments {
     await this.cases.db.$transaction(async (tx) => {
       const file = await lockedFile(tx, id);
       assertRead(actor, file);
+      if (version === 'v2') assertDocumentOwner(actor, file);
       if (
         actor.role === 'USER' &&
         !['CLOSED', 'SUSPENDED'].includes(file.status) &&

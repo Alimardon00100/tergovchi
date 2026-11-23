@@ -1,4 +1,11 @@
 import { CaseBackup } from '../case-module/backup.service';
+import { CaseOpeningController } from '../case-module/opening.controller';
+import {
+  CaseOpeningConfigController,
+  CaseOpeningGuard,
+} from '../case-module/opening-config.controller';
+import { CaseOpeningService } from '../case-module/opening.service';
+import { CaseOpeningTelemetry, registerOpeningTelemetry } from '../case-module/opening-telemetry';
 import { CaseController, CaseAuthController } from '../case-module/controllers';
 import { CaseService } from '../case-module/case.service';
 import { CaseCrypto } from '../case-module/crypto';
@@ -64,7 +71,7 @@ class Errors implements ExceptionFilter {
       void reply.sendFile('index.html');
       return;
     }
-    if (request.url.startsWith('/api/v1/')) {
+    if (/^\/api\/(?:v1|v2|case-opening)\//.test(request.url)) {
       const actor = (request as FastifyRequest & { user?: { id: string } }).user;
       await this.db.auditLog
         .create({
@@ -150,6 +157,8 @@ export async function createApi(options: HttpOptions & { webDirectory?: string }
         SystemController,
         CaseController,
         CaseAuthController,
+        CaseOpeningController,
+        CaseOpeningConfigController,
       ],
       providers: [
         Database,
@@ -159,6 +168,9 @@ export async function createApi(options: HttpOptions & { webDirectory?: string }
         QualificationService,
         CaseDocuments,
         CaseExport,
+        CaseOpeningGuard,
+        CaseOpeningService,
+        CaseOpeningTelemetry,
         MediaService,
         {
           provide: MEDIA_ROOT,
@@ -182,6 +194,7 @@ export async function createApi(options: HttpOptions & { webDirectory?: string }
   app.useGlobalFilters(new Errors(!!options.webDirectory, app.get(Database)));
   app.useGlobalInterceptors(new Envelope());
   const server = app.getHttpAdapter().getInstance();
+  registerOpeningTelemetry(server);
   server.addHook(
     'onRequest',
     (request: FastifyRequest, reply: FastifyReply, done: (error?: Error) => void) => {

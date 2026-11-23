@@ -377,7 +377,7 @@ function CreateCase({ onCreated }: { onCreated: (id: string) => void }) {
   );
 }
 function AdminMaterials({ id }: { id: string }) {
-  const { t } = useCaseUi(),
+  const { t, v2 } = useCaseUi(),
     client = useQueryClient();
   const [role, setRole] = useState('SUSPECT'),
     [gender, setGender] = useState('UNKNOWN'),
@@ -398,18 +398,25 @@ function AdminMaterials({ id }: { id: string }) {
             const form = event.currentTarget,
               f = new FormData(form);
             try {
-              await api(`/v1/cases/${id}/persons`, z.object({ id: z.string().uuid() }), {
-                method: 'POST',
-                body: JSON.stringify({
-                  fullName: f.get('fullName'),
-                  birthDate: f.get('birthDate'),
-                  address: f.get('address'),
-                  pinfl: f.get('pinfl') || null,
-                  photoUrl: null,
-                  gender,
-                  role,
-                }),
-              });
+              await api(
+                `/${v2 ? 'v2' : 'v1'}/cases/${id}/persons`,
+                z.object({ id: z.string().uuid() }),
+                {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    fullName: f.get('fullName'),
+                    birthDate: f.get('birthDate'),
+                    address: f.get('address'),
+                    pinfl: f.get('pinfl') || null,
+                    photoUrl: null,
+                    gender,
+                    role,
+                    ...(v2
+                      ? { contact: f.get('contact') || null, note: f.get('note') || null }
+                      : {}),
+                  }),
+                },
+              );
               form.reset();
               await client.invalidateQueries({ queryKey: ['legal', 'persons', id] });
               setMessage('success');
@@ -453,7 +460,17 @@ function AdminMaterials({ id }: { id: string }) {
           <CaseField label={t('address')}>
             <input name="address" autoComplete="off" required minLength={5} maxLength={500} />
           </CaseField>
-          <CaseField label="PINFL">
+          {v2 && (
+            <>
+              <CaseField label={t('contact')}>
+                <input name="contact" autoComplete="off" maxLength={500} />
+              </CaseField>
+              <CaseField label={t('personNote')}>
+                <textarea name="note" maxLength={2000} />
+              </CaseField>
+            </>
+          )}
+          <CaseField label={t('pinfl')}>
             <input
               name="pinfl"
               autoComplete="off"

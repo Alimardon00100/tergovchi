@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { caseMetaSchema } from '@detective/shared';
+import { caseMetaSchema, caseOpeningConfigSchema } from '@detective/shared';
 import type { CaseMeta } from '@detective/shared';
 import { api } from '../../shared/api/client';
 import { PaperSelect } from '../../shared/ui/PaperSelect';
@@ -14,6 +14,7 @@ type Context = {
   theme: 'light' | 'dark';
   t: (key: string) => string;
   meta: CaseMeta;
+  v2: boolean;
 };
 const Context = createContext<Context | null>(null);
 export function useCaseUi() {
@@ -36,7 +37,14 @@ export function CaseShell() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     preference('case-theme', 'light') === 'dark' ? 'dark' : 'light',
   );
-  const t = (key: string) => translate(locale, key);
+  const config = useQuery({
+    queryKey: ['case-opening-config'],
+    queryFn: () => api('/case-opening/config', caseOpeningConfigSchema),
+    refetchInterval: 10000,
+    retry: 1,
+  });
+  const v2 = config.data?.enabled === true;
+  const t = (key: string) => translate(locale, v2 ? 'caseOpening.' + key : key);
   const meta = useQuery({
     queryKey: ['legal', 'meta'],
     queryFn: () => api('/v1/meta', caseMetaSchema),
@@ -102,7 +110,12 @@ export function CaseShell() {
           </button>
         </div>
       ) : (
-        <Context.Provider value={{ locale, theme, t, meta: meta.data }}>
+        <Context.Provider value={{ locale, theme, t, meta: meta.data, v2 }}>
+          {config.isError && (
+            <p className="case-paper case-warning" role="alert">
+              {t('configFailed')}
+            </p>
+          )}
           <div className="case-actor case-paper">
             <span>{meta.data.user.displayName}</span>
             <span>

@@ -37,7 +37,7 @@ export async function assertPeople(
 @Injectable()
 export class QualificationService {
   constructor(@Inject(CaseService) readonly cases: CaseService) {}
-  async read(actor: CaseActor, id: string) {
+  async read(actor: CaseActor, id: string, v2 = false) {
     const file = await this.cases.file(id);
     assertRead(actor, file);
     if (['ADMIN', 'AUDITOR'].includes(actor.role))
@@ -61,7 +61,8 @@ export class QualificationService {
       attemptsUsed: file._count.scores,
       referenceReady:
         file.episodes.reduce((sum, e) => sum + e._count.references, 0) === file.episodes.length * 5,
-      canEdit: editable(actor, file) && ['IN_INVESTIGATION', 'SCORED'].includes(file.status),
+      canEdit:
+        editable(actor, file) && (v2 || ['IN_INVESTIGATION', 'SCORED'].includes(file.status)),
       serverTime: new Date().toISOString(),
     });
   }
@@ -70,6 +71,7 @@ export class QualificationService {
     id: string,
     element: LegalElement,
     input: { episodeId: string; payload: unknown; baseVersion: number },
+    v2 = false,
   ) {
     const parsed = draftSchemas[element].safeParse(input.payload);
     if (!parsed.success)
@@ -78,7 +80,11 @@ export class QualificationService {
     return this.cases.db.$transaction(async (tx) => {
       const file = await lockedFile(tx, id);
       assertEdit(actor, file);
-      if (!['IN_INVESTIGATION', 'SCORED'].includes(file.status))
+      if (
+        !(
+          v2 ? ['ASSIGNED', 'IN_INVESTIGATION', 'SCORED'] : ['IN_INVESTIGATION', 'SCORED']
+        ).includes(file.status)
+      )
         throw new ConflictException('Avval ish hujjatini oching.');
       if (!file.episodes.some((e) => e.id === input.episodeId))
         throw new BadRequestException('Epizod bu ishga tegishli emas.');
@@ -117,7 +123,7 @@ export class QualificationService {
         update: { payload: json(parsed.data), version: { increment: 1 } },
       });
       await tx.qualification.update({ where: { id: draft.id }, data: { updatedAt: new Date() } });
-      if (file.status === 'SCORED')
+      if (file.status === 'SCORED' || (v2 && file.status === 'ASSIGNED'))
         await tx.caseFile.update({ where: { id }, data: { status: 'IN_INVESTIGATION' } });
       await audit(tx, actor, conflict ? 'DRAFT_CONFLICT_LWW' : 'DRAFT_SAVED', id, {
         episodeId: input.episodeId,

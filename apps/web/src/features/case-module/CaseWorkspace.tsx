@@ -140,8 +140,8 @@ export function CaseWorkspacePage() {
     </>
   );
 }
-function General({ workspace }: { workspace: CaseWorkspace }) {
-  const { t, meta } = useCaseUi(),
+export function General({ workspace }: { workspace: CaseWorkspace }) {
+  const { t, meta, v2 } = useCaseUi(),
     client = useQueryClient();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -151,11 +151,12 @@ function General({ workspace }: { workspace: CaseWorkspace }) {
     setBusy(true);
     setError('');
     try {
-      await api(`/v1/cases/${id}/${name}`, z.unknown(), {
+      await api(`/${v2 && name === 'lock' ? 'v2' : 'v1'}/cases/${id}/${name}`, z.unknown(), {
         method: name === 'lock-release' ? 'DELETE' : 'POST',
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
       await client.invalidateQueries({ queryKey: ['legal'] });
+      if (v2) await client.invalidateQueries({ queryKey: ['case-opening-v2'] });
     } catch {
       setError(t('error'));
     } finally {
@@ -197,8 +198,9 @@ function General({ workspace }: { workspace: CaseWorkspace }) {
           onClick={async () => {
             setBusy(true);
             try {
-              await api(`/v1/cases/${id}/lock`, z.unknown(), { method: 'DELETE' });
+              await api(`/${v2 ? 'v2' : 'v1'}/cases/${id}/lock`, z.unknown(), { method: 'DELETE' });
               await client.invalidateQueries({ queryKey: ['legal'] });
+              if (v2) await client.invalidateQueries({ queryKey: ['case-opening-v2'] });
             } catch {
               setError(t('error'));
             } finally {
@@ -400,11 +402,11 @@ function Documents({ id }: { id: string }) {
     </div>
   );
 }
-function Results({ id }: { id: string }) {
-  const { t } = useCaseUi();
+export function Results({ id }: { id: string }) {
+  const { t, v2 } = useCaseUi();
   const query = useQuery({
-    queryKey: ['legal', 'scores', id],
-    queryFn: () => api(`/v1/cases/${id}/score`, scoreHistorySchema),
+    queryKey: ['legal', 'scores', id, v2],
+    queryFn: () => api(`/${v2 ? 'v2' : 'v1'}/cases/${id}/score`, scoreHistorySchema),
   });
   const [error, setError] = useState('');
   if (query.isPending) return <CasePending />;

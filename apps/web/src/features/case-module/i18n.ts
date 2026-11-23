@@ -1,5 +1,35 @@
 export type CaseLocale = 'uz-Latn' | 'uz-Cyrl' | 'ru';
 const words: Record<string, readonly [string, string]> = {
+  configFailed: [
+    'Ish maydoni sozlamasi olinmadi. Qayta yuklang.',
+    'Не удалось загрузить настройки рабочего места. Обновите страницу.',
+  ],
+  reopenWorkspace: [
+    'Ish maydoni yangilandi. Sahifani qayta oching.',
+    'Рабочее место обновлено. Откройте страницу повторно.',
+  ],
+  contact: ['Aloqa', 'Контакты'],
+  personNote: ['Shaxs haqida izoh', 'Примечание о лице'],
+  pinfl: ['PINFL', 'ПИНФЛ'],
+  lockLost: ['Ishni qayta oling', 'Возьмите дело повторно'],
+  lockedElsewhere: ['Ish boshqa tergovchida', 'Дело у другого следователя'],
+  ownerOnly: [
+    'Hujjatlar va dalillar faqat faol qulf egasiga ochiladi.',
+    'Документы и доказательства доступны владельцу действующей блокировки.',
+  ],
+  rolledBack: [
+    'Saqlash rad etildi. Oxirgi saqlangan javob tiklandi.',
+    'Сохранение отклонено. Восстановлен последний сохранённый ответ.',
+  ],
+  rateLimited: [
+    'Bir daqiqada ko‘pi bilan 3 marta tekshirish mumkin.',
+    'Допустимо не более 3 проверок в минуту.',
+  ],
+  tabFailed: ['Bu varaqni ochishda xato yuz berdi.', 'Не удалось открыть вкладку.'],
+  telemetryFailed: [
+    'Varaq ko‘rish hodisasi qayd etilmadi. Aloqani tekshiring.',
+    'Не удалось зарегистрировать просмотр вкладки. Проверьте соединение.',
+  ],
   board: ['Tergov doskasi', 'Доска следствия'],
   registry: ['Jinoyat ishlari reyestri', 'Реестр уголовных дел'],
   eyebrow: ['TERGOV BO‘LINMASI · XIZMAT DAFTARI', 'СЛЕДСТВЕННЫЙ ОТДЕЛ · РЕЕСТР'],
@@ -289,6 +319,18 @@ const cyrillic: Record<string, string> = {
   board: 'Тергов доскаси',
 };
 export function translate(locale: CaseLocale, key: string) {
+  if (key.startsWith('caseOpening.')) {
+    const name = key.slice('caseOpening.'.length);
+    if (name === 'persons')
+      return locale === 'ru'
+        ? 'Подозреваемые'
+        : locale === 'uz-Cyrl'
+          ? 'Гумондорлар'
+          : 'Gumondorlar';
+    if (name === 'evidence')
+      return locale === 'ru' ? 'ДОКАЗАТЕЛЬСТВО' : locale === 'uz-Cyrl' ? 'ДАЛИЛ' : 'DALIL';
+    return translate(locale, name);
+  }
   if (locale === 'uz-Cyrl' && cyrillic[key]) return cyrillic[key];
   const entry = words[key];
   const value = entry ? (locale === 'ru' ? entry[1] : entry[0]) : key;
