@@ -9,3 +9,4 @@ export * from './media';
 export * from './profile';
 export * from './case-module/contracts';
 export * from './case-module/qualification';
+export * from './case-module/opening-v2';

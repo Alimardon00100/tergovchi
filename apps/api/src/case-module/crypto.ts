@@ -47,13 +47,20 @@ export class CaseCrypto {
     userId: string;
     sha256: string;
     expires: number;
+    version?: 'v2';
   }) {
     const body = Buffer.from(JSON.stringify(claims)).toString('base64url');
     return body + '.' + createHmac('sha256', this.signing).update(body).digest('base64url');
   }
   verify(
     token: string,
-    expected: { documentId: string; caseId: string; userId: string; sha256: string },
+    expected: {
+      documentId: string;
+      caseId: string;
+      userId: string;
+      sha256: string;
+      version?: 'v2';
+    },
   ) {
     if (token.length > 1500) throw new ForbiddenException('Hujjat havolasi yaroqsiz.');
     const [body, signature, ...extra] = token.split('.');
@@ -75,6 +82,7 @@ export class CaseCrypto {
     if (
       typeof claims['expires'] !== 'number' ||
       claims['expires'] <= Date.now() ||
+      claims['version'] !== expected.version ||
       Object.entries(expected).some(([key, value]) => claims[key] !== value)
     )
       throw new ForbiddenException('Hujjat havolasining muddati tugagan.');
