@@ -4,6 +4,10 @@ const words: Record<string, readonly [string, string]> = {
     'Ish maydoni sozlamasi olinmadi. Qayta yuklang.',
     'Не удалось загрузить настройки рабочего места. Обновите страницу.',
   ],
+  reopenWorkspace: [
+    'Ish maydoni yangilandi. Sahifani qayta oching.',
+    'Рабочее место обновлено. Откройте страницу повторно.',
+  ],
   contact: ['Aloqa', 'Контакты'],
   personNote: ['Shaxs haqida izoh', 'Примечание о лице'],
   pinfl: ['PINFL', 'ПИНФЛ'],

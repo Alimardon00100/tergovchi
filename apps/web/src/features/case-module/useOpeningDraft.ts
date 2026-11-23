@@ -20,6 +20,7 @@ export function useOpeningDraft(workspace: CaseWorkspace) {
     client = useQueryClient(),
     id = workspace.case.id;
   const key = `case-draft:v2:${meta.user.id}:${id}`;
+  const legacyKey = `case-draft:${meta.user.id}:${id}`;
   const query = useQuery({
     queryKey: ['case-opening-v2', 'draft', id],
     queryFn: () => api(`/v2/cases/${id}/qualification`, draftViewSchema),
@@ -44,11 +45,12 @@ export function useOpeningDraft(workspace: CaseWorkspace) {
       setRows(next);
       try {
         persistOpening(key, next);
+        persistOpening(legacyKey, next);
       } catch {
         setWarning('localUnavailable');
       }
     },
-    [key],
+    [key, legacyKey],
   );
   useEffect(() => {
     if (!query.data || initialized.current) return;
@@ -133,7 +135,10 @@ export function useOpeningDraft(workspace: CaseWorkspace) {
       } catch (failure) {
         const rejected =
           failure instanceof ApiError && failure.status >= 400 && failure.status < 500;
-        if (rejected) {
+        if (failure instanceof ApiError && failure.status === 404) {
+          setBlocked(true);
+          setError('reopenWorkspace');
+        } else if (rejected) {
           commit(
             model.current.map((row) => ({
               ...row,

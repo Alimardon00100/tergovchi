@@ -10,6 +10,7 @@ import {
   submitAnswers,
 } from './support/case-opening';
 import type { Harness } from './support/case-opening';
+import { expectOpeningParity } from './support/opening-parity';
 
 let h: Harness;
 let personId = '';
@@ -260,5 +261,6 @@ describe('Case opening v2 policy and parity', () => {
     const v1 = body<{ items: unknown[] }>(await h.request('user', 'GET', '/cases'));
     const v2 = body<{ items: unknown[] }>(await get('user', '/cases'));
     expect(v2.items).toEqual(v1.items);
+    await expectOpeningParity(h, firstCase);
   });
 });

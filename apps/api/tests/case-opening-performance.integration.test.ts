@@ -8,6 +8,7 @@ import type { Harness } from './support/case-opening';
 let h: Harness;
 beforeAll(async () => {
   vi.stubEnv('FF_CASE_OPENING_V2', 'true');
+  vi.stubEnv('FF_CASE_OPENING_V2_PERCENTAGE', '100');
   h = await createHarness();
 }, 30000);
 afterAll(async () => {

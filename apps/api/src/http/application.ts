@@ -5,7 +5,7 @@ import {
   CaseOpeningGuard,
 } from '../case-module/opening-config.controller';
 import { CaseOpeningService } from '../case-module/opening.service';
-import { CaseOpeningTelemetry } from '../case-module/opening-telemetry';
+import { CaseOpeningTelemetry, registerOpeningTelemetry } from '../case-module/opening-telemetry';
 import { CaseController, CaseAuthController } from '../case-module/controllers';
 import { CaseService } from '../case-module/case.service';
 import { CaseCrypto } from '../case-module/crypto';
@@ -194,6 +194,7 @@ export async function createApi(options: HttpOptions & { webDirectory?: string }
   app.useGlobalFilters(new Errors(!!options.webDirectory, app.get(Database)));
   app.useGlobalInterceptors(new Envelope());
   const server = app.getHttpAdapter().getInstance();
+  registerOpeningTelemetry(server);
   server.addHook(
     'onRequest',
     (request: FastifyRequest, reply: FastifyReply, done: (error?: Error) => void) => {

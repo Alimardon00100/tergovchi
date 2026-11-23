@@ -13,7 +13,7 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "turbo run test && node --test tests/assets.test.mjs tests/local-runtime.test.mjs tests/managed-services.test.mjs tests/installer.test.mjs",
+    "test": "turbo run test && node --test tests/assets.test.mjs tests/local-runtime.test.mjs tests/managed-services.test.mjs tests/installer.test.mjs tests/case-opening-metrics.test.mjs",
     "test:db": "pnpm --filter @detective/api test:db",
     "test:http": "pnpm --filter @detective/api test:http",
     "test:browser": "node --env-file=.env tests/browser.smoke.mjs",
@@ -40,7 +40,10 @@
     "test:case-opening:v2": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-v2",
     "test:case-opening:browser": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-browser",
     "test:case-opening:browser:legacy": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-browser-legacy",
-    "test:case-opening:performance": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-performance"
+    "test:case-opening:browser:rollback": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-browser-rollback",
+    "test:case-opening:performance": "pnpm --filter @detective/api exec dotenv -e ../../.env -- tsx scripts/test-database.ts --case-opening-performance",
+    "metrics:case-opening": "node scripts/case-opening-metrics.mjs",
+    "backup:case-opening:database": "node --env-file=.env scripts/backup-case-opening-database.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
